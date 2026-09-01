@@ -791,6 +791,11 @@ body {
           <div class="md-var-btns" data-for="setImgPrefix" data-vars="date"></div>
         </div>
         <div class="setting-row">
+          <label data-i18n="l.emojiPrefix">表情包外链时的前置链接：</label>
+          <input type="text" id="setEmojiPrefix" oninput="onSettingChange()">
+          <div class="md-var-btns" data-for="setEmojiPrefix" data-vars="date"></div>
+        </div>
+        <div class="setting-row">
           <label data-i18n="l.imgExt">图片外链后缀：</label>
           <select id="setImgExt" onchange="onSettingChange()">
             <option value="png">png</option>
@@ -917,6 +922,14 @@ body {
           </div>
         </div>
         <div class="setting-row">
+          <label data-i18n="l.maxFileSize">批量导出md时，每个md的最大文件大小：</label>
+          <div class="input-inline-group">
+            <input type="number" id="setMdMaxKB" min="1" max="500" oninput="onSettingChange()">
+            <span class="input-inline-note">KB</span>
+          </div>
+          <div class="setting-note" data-i18n="n.maxFileSize">建议不要超过50KB，否则在Obsidian里打开会很卡</div>
+        </div>
+        <div class="setting-row">
           <label data-i18n="l.imgExportDir">图片导出文件夹：</label>
           <button type="button" class="btn" onclick="chooseExportDir('img')" data-i18n="b.chooseImgDir">📁 选择图片导出文件夹</button>
           <span id="imgExportDirLabel" class="setting-note" data-i18n="ui.notSet">未设置，导出时提示选择</span>
@@ -936,12 +949,10 @@ body {
           </div>
         </div>
         <div class="setting-row">
-          <label data-i18n="l.maxFileSize">批量导出md时，每个md的最大文件大小：</label>
-          <div class="input-inline-group">
-            <input type="number" id="setMdMaxKB" min="1" max="500" oninput="onSettingChange()">
-            <span class="input-inline-note">KB</span>
-          </div>
-          <div class="setting-note" data-i18n="n.maxFileSize">建议不要超过50KB，否则在Obsidian里打开会很卡</div>
+          <label data-i18n="l.emojiExportDir">表情包导出文件夹：</label>
+          <button type="button" class="btn" onclick="chooseExportDir('emoji')" data-i18n="b.chooseEmojiDir">📁 选择表情包导出文件夹</button>
+          <span id="emojiExportDirLabel" class="setting-note" data-i18n="ui.notSet">未设置，导出时提示选择</span>
+          <div class="setting-note" data-i18n="n.emojiExportDir">功能同上</div>
         </div>
       </div>
 
@@ -1062,6 +1073,7 @@ const DEFAULT_SETTINGS = {
   userName: '我',
   facePrefix: '',
   imgPrefix: '',
+  emojiPrefix: '',
   imgExt: 'png',
   chatboxStyle: 'linshe',
   chatTitle: '{{role}}',
@@ -1092,11 +1104,11 @@ const I18N = {
   zh: {
     'h.settings':'⚙️ 设置','h.subtitle':'调整导出选项，保存后本地生效',
     's.appearance':'🎨 外观','s.connection':'🔗 连接','s.imgLinks':'🖼️ 图片链接','s.exportFormat':'💬 导出格式','s.mdTemplate':'📄 md模板设置','s.obsidian':'📥 导入Obsidian设置','s.exportAvatars':'📷 导出头像',
-    'l.theme':'外观：','l.language':'系统语言：','l.linsheUrl':'邻舍网址：','l.userName':'用户名：','l.facePrefix':'头像外链时的前置链接：','l.imgPrefix':'聊天记录的图片外链时的前置链接：','l.imgExt':'图片外链后缀：','l.chatboxStyle':'chatbox样式：','l.chatTitle':'聊天框标题：','l.mergeConsecutive':'是否合并同角色的连续发言：','l.autoSelectImages':'是否在自动连续勾选时也选中图片（影响导出）：','l.mdTemplateLabel':'md模板（参考 Obsidian Web Clipper）：','l.templateName':'模板名称：','l.mdFileNamePrivate':'md文件名（私聊）：','l.mdFileNameGroup':'md文件名（群聊）：','l.mdDirectObsidian':'md文件是否直接添加到Obsidian：','l.mdFolder':'Obsidian md文件夹：','l.mdExportDir':'md导出文件夹：','l.imgExportDir':'图片导出文件夹：','l.mdSubFolder':'md子文件夹：','l.mdSubFolderEnabled':'单次导出md时是否创建子文件夹：','l.imgSubFolder':'图片子文件夹：','l.imgSubFolderEnabled':'单次导出md的图片时是否创建子文件夹：','l.maxFileSize':'批量导出md时，每个md的最大文件大小：',
+    'l.theme':'外观：','l.language':'系统语言：','l.linsheUrl':'邻舍网址：','l.userName':'用户名：','l.facePrefix':'头像外链时的前置链接：','l.imgPrefix':'聊天记录的图片外链时的前置链接：','l.emojiPrefix':'表情包外链时的前置链接：','l.imgExt':'图片外链后缀：','l.chatboxStyle':'chatbox样式：','l.chatTitle':'聊天框标题：','l.mergeConsecutive':'是否合并同角色的连续发言：','l.autoSelectImages':'是否在自动连续勾选时也选中图片（影响导出）：','l.mdTemplateLabel':'md模板（参考 Obsidian Web Clipper）：','l.templateName':'模板名称：','l.mdFileNamePrivate':'md文件名（私聊）：','l.mdFileNameGroup':'md文件名（群聊）：','l.mdDirectObsidian':'md文件是否直接添加到Obsidian：','l.mdFolder':'Obsidian md文件夹：','l.mdExportDir':'md导出文件夹：','l.imgExportDir':'图片导出文件夹：','l.emojiExportDir':'表情包导出文件夹：','l.mdSubFolder':'md子文件夹：','l.mdSubFolderEnabled':'单次导出md时是否创建子文件夹：','l.imgSubFolder':'图片子文件夹：','l.imgSubFolderEnabled':'单次导出md的图片时是否创建子文件夹：','l.maxFileSize':'批量导出md时，每个md的最大文件大小：',
     'o.theme.light':'浅色','o.theme.dark':'深色','o.theme.system':'跟随系统','o.lang.zh':'简体中文','o.lang.en':'English',
     'o.yes':'是','o.no':'否','o.chatboxStyle.normal':'普通','o.chatboxStyle.bbs':'bbs','o.chatboxStyle.pop':'pop','o.chatboxStyle.wechat':'wechat','o.chatboxStyle.qqchat':'qqchat','o.chatboxStyle.linshe':'邻舍','o.chatboxStyle.baker':'Baker',
-    'n.theme':'浅色为默认配色；深色为深色整体配色；跟随系统则自动匹配操作系统的深浅色设置','n.linsheUrl':'此处的值直接更改 API 网址（默认：http://localhost:3099）。修改后点击"重新连接"立即生效，无需刷新页面','n.userName':'此处的值直接更改用户显示名称（默认："我"）','n.facePrefix':'这个链接 + 角色头像图片文件名 = 复制文本中的头像链接，留空时仅使用头像文件名（带后缀）。例如填写 http://192.168.31.24:37777/Notepic/Icon/ 后，用户的头像链接即为 http://192.168.31.24:37777/Notepic/Icon/user_avatar.png','n.imgPrefix':'作用跟头像外链前置一致，留空时仅使用图片文件名（不含后缀）+ 下方选择的后缀。','n.imgExt':'此处的值直接更改复制时聊天记录图片链接的后缀名及图片保存时的后缀名','n.chatboxStyle':'推荐圆形头像框的后三个样式','n.chatTitle':'默认为"角色名/群聊名"，支持与 md 文件名相同的变量（如 {{role}}、{{YYYY}}{{MM}}{{DD}} 等），渲染时替换','n.mdTemplate':'模板变量：{{mdFileName}} md文件名(不含.md) · {{title}} 聊天框标题 · {{date}} 日期(YYYY-MM-DD) · {{time}} 时间(HH:mm) · {{role}} 当前对话名（私聊为角色名、群聊为群聊名）· {{previousFileName}} 上一个md文件名(不含.md，批量导出时有效，第一个或单独导出为空) · {{content}} 聊天记录正文（复制格式）','n.mdFileNamePrivate':'变量按钮点击后插入到光标位置（无光标时加到末尾），{{YYYY}}{{MM}}{{DD}} 为聊天记录日期、{{hh}}{{mm}}{{ss}} 为记录时间（批量导出时取该文件第一条消息的时间），文件名最长 260 字符','n.mdFileNameGroup':'变量按钮点击后插入到光标位置（无光标时加到末尾），{{YYYY}}{{MM}}{{DD}} 为聊天记录日期、{{hh}}{{mm}}{{ss}} 为记录时间（批量导出时取该文件第一条消息的时间），文件名最长 260 字符','n.mdDirectObsidian':'选择"是"时，"导出md"按钮将通过 obsidian://new 在 Obsidian 仓库中创建文件（需已安装并打开过 Obsidian）；"范围批量导出md"始终按下方"md导出文件夹"设置导出到本地文件夹（Obsidian URI 批量导出大概率会丢失文件）。选择"否"时，"导出md"按"md导出文件夹"设置导出','n.mdFolder':'仅当"md文件是否直接添加到Obsidian"为"是"时使用，为 Obsidian 仓库根目录下的路径，支持用 "/" 创建子文件夹，如 "日记/{{YYYY}}{{MM}}{{DD}}_linsheMD"','n.mdExportDir':'预先指定 md 文件的导出位置（Chrome/Edge 支持）。未设置时，导出过程中会弹出"选择md导出文件夹"提示并让您选择；不支持选择文件夹的环境自动下载到浏览器默认下载文件夹','n.mdSubFolder':'会在导出到设置的本地文件夹时自动创建子文件夹，方便分类','n.imgExportDir':'预先指定图片的导出位置（Chrome/Edge 支持）。未设置时，导出过程中会弹出"选择图片导出文件夹"提示并让您选择；不支持选择文件夹的环境自动下载到浏览器默认下载文件夹','n.imgSubFolder':'会在导出到设置的本地文件夹时自动创建子文件夹，方便分类','n.exportAvatars':'一次性导出所有角色和用户的头像到指定文件夹里；不支持环境下自动下载到浏览器默认下载文件夹','n.maxFileSize':'建议不要超过50KB，否则在Obsidian里打开会很卡',
-    'b.reconnect':'🔄 重新连接','b.exportAvatars':'📷 导出头像','b.chooseMdDir':'📁 选择md导出文件夹','b.chooseImgDir':'📁 选择图片导出文件夹','b.newTemplate':'＋ 新建模板','b.exportTemplate':'📤 导出当前模板','b.importTemplate':'📥 导入当前模板','b.save':'💾 保存','b.reset':'↺ 重置','b.exportSettings':'📤 导出设置','b.importSettings':'📥 导入设置','b.copySelected':'📋 复制选中','b.exportMd':'📄 导出md','b.clear':'✕ 清除','b.batchExport':'🗂 范围批量导出md','b.go':'GO',
+    'n.theme':'浅色为默认配色；深色为深色整体配色；跟随系统则自动匹配操作系统的深浅色设置','n.linsheUrl':'此处的值直接更改 API 网址（默认：http://localhost:3099）。修改后点击"重新连接"立即生效，无需刷新页面','n.userName':'此处的值直接更改用户显示名称（默认："我"）','n.facePrefix':'这个链接 + 角色头像图片文件名 = 复制文本中的头像链接，留空时仅使用头像文件名（带后缀）。例如填写 http://192.168.31.24:37777/Notepic/Icon/ 后，用户的头像链接即为 http://192.168.31.24:37777/Notepic/Icon/user_avatar.png','n.imgPrefix':'作用跟头像外链前置一致，留空时仅使用图片文件名（不含后缀）+ 下方选择的后缀。','n.imgExt':'此处的值直接更改复制时聊天记录图片链接的后缀名及图片保存时的后缀名','n.chatboxStyle':'推荐圆形头像框的后三个样式','n.chatTitle':'默认为"角色名/群聊名"，支持与 md 文件名相同的变量（如 {{role}}、{{YYYY}}{{MM}}{{DD}} 等），渲染时替换','n.mdTemplate':'模板变量：{{mdFileName}} md文件名(不含.md) · {{title}} 聊天框标题 · {{date}} 日期(YYYY-MM-DD) · {{time}} 时间(HH:mm) · {{role}} 当前对话名（私聊为角色名、群聊为群聊名）· {{previousFileName}} 上一个md文件名(不含.md，批量导出时有效，第一个或单独导出为空) · {{content}} 聊天记录正文（复制格式）','n.mdFileNamePrivate':'变量按钮点击后插入到光标位置（无光标时加到末尾），{{YYYY}}{{MM}}{{DD}} 为聊天记录日期、{{hh}}{{mm}}{{ss}} 为记录时间（批量导出时取该文件第一条消息的时间），文件名最长 260 字符','n.mdFileNameGroup':'变量按钮点击后插入到光标位置（无光标时加到末尾），{{YYYY}}{{MM}}{{DD}} 为聊天记录日期、{{hh}}{{mm}}{{ss}} 为记录时间（批量导出时取该文件第一条消息的时间），文件名最长 260 字符','n.mdDirectObsidian':'选择"是"时，"导出md"按钮将通过 obsidian://new 在 Obsidian 仓库中创建文件（需已安装并打开过 Obsidian）；"范围批量导出md"始终按下方"md导出文件夹"设置导出到本地文件夹（Obsidian URI 批量导出大概率会丢失文件）。选择"否"时，"导出md"按"md导出文件夹"设置导出','n.mdFolder':'仅当"md文件是否直接添加到Obsidian"为"是"时使用，为 Obsidian 仓库根目录下的路径，支持用 "/" 创建子文件夹，如 "日记/{{YYYY}}{{MM}}{{DD}}_linsheMD"','n.mdExportDir':'预先指定 md 文件的导出位置（Chrome/Edge 支持）。未设置时，导出过程中会弹出"选择md导出文件夹"提示并让您选择；不支持选择文件夹的环境自动下载到浏览器默认下载文件夹','n.mdSubFolder':'会在导出到设置的本地文件夹时自动创建子文件夹，方便分类','n.imgExportDir':'预先指定图片的导出位置（Chrome/Edge 支持）。未设置时，导出过程中会弹出"选择图片导出文件夹"提示并让您选择；不支持选择文件夹的环境自动下载到浏览器默认下载文件夹','n.emojiExportDir':'功能同上','n.imgSubFolder':'会在导出到设置的本地文件夹时自动创建子文件夹，方便分类','n.exportAvatars':'一次性导出所有角色和用户的头像到指定文件夹里；不支持环境下自动下载到浏览器默认下载文件夹','n.maxFileSize':'建议不要超过50KB，否则在Obsidian里打开会很卡',
+    'b.reconnect':'🔄 重新连接','b.exportAvatars':'📷 导出头像','b.chooseMdDir':'📁 选择md导出文件夹','b.chooseImgDir':'📁 选择图片导出文件夹','b.chooseEmojiDir':'📁 选择表情包导出文件夹','b.newTemplate':'＋ 新建模板','b.exportTemplate':'📤 导出当前模板','b.importTemplate':'📥 导入当前模板','b.save':'💾 保存','b.reset':'↺ 重置','b.exportSettings':'📤 导出设置','b.importSettings':'📥 导入设置','b.copySelected':'📋 复制选中','b.exportMd':'📄 导出md','b.clear':'✕ 清除','b.batchExport':'🗂 范围批量导出md','b.go':'GO',
     'tab.private':'私聊','tab.group':'群聊',
     'ui.searchPlaceholder':'搜索角色/群聊…','ui.msgSearchPlaceholder':'空格分隔搜索关键词（内容/ID/角色名/日期），+扩大 -排除','ui.selectAllPrefix':'已选中','ui.selectAllMsg':'条消息和','ui.selectAllImg':'张图片','ui.selectAllHint':'勾选两条不连续的对话能自动选取中间所有的对话选框','ui.exportFromLabel':'已导出到 ID:','ui.pageJump':'跳转','ui.exportOverlay':'正在导出，请稍候…','ui.chatTitlePlaceholder':'← 请从左侧选择一个对话','ui.selectChatHint':'请从左侧选择一个对话','ui.notSet':'未设置，导出时提示选择','ui.folderSelected':'已选择：','ui.subtitle':'查看 & 框选复制','ui.exportOverlayBatch':'正在批量导出 {count} 个 md 文件…','ui.pageTitle':'邻舍 · 聊天记录导出器','ui.headerTitle':'📋 邻舍 · 聊天记录导出器','ui.connected':'已连接','ui.checkingConnection':'检查连接…','ui.connectFailed':'连接失败','ui.selectImg':'选中此图片','ui.exportAllTitle':'按日期批量导出从文本框ID之后到末尾的聊天记录（0=导出全部）','ui.settingsPage':'设置页面',
     'ui.noResults':'没有匹配的结果','ui.noData':'暂无数据','ui.noSearchResults':'没有匹配的消息','ui.tryOtherKeywords':'试试其他关键词','ui.noMessages':'暂无消息记录','ui.msgCount':'共 {count} 条','ui.filteredCount':'共 {total} 条 · 筛选出 {filtered} 条','ui.loadingMessages':'加载消息中…',
@@ -1108,11 +1120,11 @@ const I18N = {
   en: {
     'h.settings':'⚙️ Settings','h.subtitle':'Adjust export options, saved locally',
     's.appearance':'🎨 Appearance','s.connection':'🔗 Connection','s.imgLinks':'🖼️ Image Links','s.exportFormat':'💬 Export Format','s.mdTemplate':'📄 MD Template Settings','s.obsidian':'📥 Obsidian Import Settings','s.exportAvatars':'📷 Export Avatars',
-    'l.theme':'Theme:','l.language':'Language:','l.linsheUrl':'Linshe URL:','l.userName':'Username:','l.facePrefix':'Avatar external link prefix:','l.imgPrefix':'Image external link prefix:','l.imgExt':'Image extension:','l.chatboxStyle':'Chatbox style:','l.chatTitle':'Chat title:','l.mergeConsecutive':'Merge consecutive messages from same role:','l.autoSelectImages':'Auto-select images with consecutive selection:','l.mdTemplateLabel':'MD template (see Obsidian Web Clipper):','l.templateName':'Template name:','l.mdFileNamePrivate':'MD filename (private):','l.mdFileNameGroup':'MD filename (group):','l.mdDirectObsidian':'Add MD files directly to Obsidian:','l.mdFolder':'Obsidian MD Folder:','l.mdExportDir':'MD export folder:','l.imgExportDir':'Image export folder:','l.mdSubFolder':'MD Subfolder:','l.mdSubFolderEnabled':'Create subfolder on single MD export:','l.imgSubFolder':'Image Subfolder:','l.imgSubFolderEnabled':'Create subfolder on single image export:','l.maxFileSize':'Max file size per MD when batch exporting:',
+    'l.theme':'Theme:','l.language':'Language:','l.linsheUrl':'Linshe URL:','l.userName':'Username:','l.facePrefix':'Avatar external link prefix:','l.imgPrefix':'Image external link prefix:','l.emojiPrefix':'Emoji image external link prefix:','l.imgExt':'Image extension:','l.chatboxStyle':'Chatbox style:','l.chatTitle':'Chat title:','l.mergeConsecutive':'Merge consecutive messages from same role:','l.autoSelectImages':'Auto-select images with consecutive selection:','l.mdTemplateLabel':'MD template (see Obsidian Web Clipper):','l.templateName':'Template name:','l.mdFileNamePrivate':'MD filename (private):','l.mdFileNameGroup':'MD filename (group):','l.mdDirectObsidian':'Add MD files directly to Obsidian:','l.mdFolder':'Obsidian MD Folder:','l.mdExportDir':'MD export folder:','l.imgExportDir':'Image export folder:','l.emojiExportDir':'Emoji image export folder:','l.mdSubFolder':'MD Subfolder:','l.mdSubFolderEnabled':'Create subfolder on single MD export:','l.imgSubFolder':'Image Subfolder:','l.imgSubFolderEnabled':'Create subfolder on single image export:','l.maxFileSize':'Max file size per MD when batch exporting:',
     'o.theme.light':'Light','o.theme.dark':'Dark','o.theme.system':'System','o.lang.zh':'简体中文','o.lang.en':'English',
     'o.yes':'Yes','o.no':'No','o.chatboxStyle.normal':'Normal','o.chatboxStyle.bbs':'bbs','o.chatboxStyle.pop':'pop','o.chatboxStyle.wechat':'wechat','o.chatboxStyle.qqchat':'qqchat','o.chatboxStyle.linshe':'Linshe','o.chatboxStyle.baker':'Baker',
-    'n.theme':'Light is the default theme; Dark is a dark theme; System follows the OS setting automatically','n.linsheUrl':'Changes the API URL (default: http://localhost:3099). Click "Reconnect" after changing to apply immediately','n.userName':'Changes the display name shown in exports (default: "我")','n.facePrefix':'This prefix + avatar filename = avatar link in copied text. Leave empty to use only the filename. Example: If input http://192.168.31.24:37777/Notepic/Icon/ , face link = http://192.168.31.24:37777/Notepic/Icon/user_avatar.png','n.imgPrefix':'Same as avatar prefix. Leave empty to use only filename (no extension) + the extension selected below.','n.imgExt':'Changes the extension used in exported image links and saved image filenames','n.chatboxStyle':'The last three styles are recommended for circular avatars','n.chatTitle':'Default: "Role/Group". Supports same variables as MD filename ({{role}}, {{YYYY}}, etc.), replaced when rendering','n.mdTemplate':'Template variables: {{mdFileName}} MD filename (no .md) · {{title}} Chat title · {{date}} Date (YYYY-MM-DD) · {{time}} Time (HH:mm) · {{role}} Current chat name · {{previousFileName}} Previous MD filename · {{content}} Message body','n.mdFileNamePrivate':'Variable buttons insert at cursor. {{YYYY}}{{MM}}{{DD}} = chat date, {{hh}}{{mm}}{{ss}} = message time. Max 260 chars.','n.mdFileNameGroup':'Variable buttons insert at cursor. {{YYYY}}{{MM}}{{DD}} = chat date, {{hh}}{{mm}}{{ss}} = message time. Max 260 chars.','n.mdDirectObsidian':'When "Yes", "Export MD" creates files via obsidian://new (Obsidian must be installed). "Batch Export MD" always uses the MD export folder setting below. When "No", "Export MD" uses the MD export folder.','n.mdFolder':'Only used when "Add MD files directly to Obsidian" is "Yes". Path relative to Obsidian vault root. Use "/" for subfolders, e.g. "Diary/{{YYYY}}{{MM}}{{DD}}_linsheMD"','n.mdExportDir':'Pre-select MD export folder (Chrome/Edge). If not set, you will be prompted during export.','n.mdSubFolder':'Creates subfolders automatically when exporting to the local folder, for easy organization','n.imgExportDir':'Pre-select image export folder (Chrome/Edge). If not set, you will be prompted during export.','n.imgSubFolder':'Creates subfolders automatically when exporting images to the local folder, for easy organization','n.exportAvatars':'Export all character and user avatars to a folder. If folder selection is not supported, files will be downloaded to the default download folder.','n.maxFileSize':'Recommended max 50KB, otherwise Obsidian may lag when opening large files.',
-    'b.reconnect':'🔄 Reconnect','b.exportAvatars':'📷 Export Avatars','b.chooseMdDir':'📁 Choose MD Export Folder','b.chooseImgDir':'📁 Choose Image Export Folder','b.newTemplate':'＋ New Template','b.exportTemplate':'📤 Export Template','b.importTemplate':'📥 Import Template','b.save':'💾 Save','b.reset':'↺ Reset','b.exportSettings':'📤 Export Settings','b.importSettings':'📥 Import Settings','b.copySelected':'📋 Copy Selected','b.exportMd':'📄 Export MD','b.clear':'✕ Clear','b.batchExport':'🗂 Batch Export MD','b.go':'GO',
+    'n.theme':'Light is the default theme; Dark is a dark theme; System follows the OS setting automatically','n.linsheUrl':'Changes the API URL (default: http://localhost:3099). Click "Reconnect" after changing to apply immediately','n.userName':'Changes the display name shown in exports (default: "我")','n.facePrefix':'This prefix + avatar filename = avatar link in copied text. Leave empty to use only the filename. Example: If input http://192.168.31.24:37777/Notepic/Icon/ , face link = http://192.168.31.24:37777/Notepic/Icon/user_avatar.png','n.imgPrefix':'Same as avatar prefix. Leave empty to use only filename (no extension) + the extension selected below.','n.imgExt':'Changes the extension used in exported image links and saved image filenames','n.chatboxStyle':'The last three styles are recommended for circular avatars','n.chatTitle':'Default: "Role/Group". Supports same variables as MD filename ({{role}}, {{YYYY}}, etc.), replaced when rendering','n.mdTemplate':'Template variables: {{mdFileName}} MD filename (no .md) · {{title}} Chat title · {{date}} Date (YYYY-MM-DD) · {{time}} Time (HH:mm) · {{role}} Current chat name · {{previousFileName}} Previous MD filename · {{content}} Message body','n.mdFileNamePrivate':'Variable buttons insert at cursor. {{YYYY}}{{MM}}{{DD}} = chat date, {{hh}}{{mm}}{{ss}} = message time. Max 260 chars.','n.mdFileNameGroup':'Variable buttons insert at cursor. {{YYYY}}{{MM}}{{DD}} = chat date, {{hh}}{{mm}}{{ss}} = message time. Max 260 chars.','n.mdDirectObsidian':'When "Yes", "Export MD" creates files via obsidian://new (Obsidian must be installed). "Batch Export MD" always uses the MD export folder setting below. When "No", "Export MD" uses the MD export folder.','n.mdFolder':'Only used when "Add MD files directly to Obsidian" is "Yes". Path relative to Obsidian vault root. Use "/" for subfolders, e.g. "Diary/{{YYYY}}{{MM}}{{DD}}_linsheMD"','n.mdExportDir':'Pre-select MD export folder (Chrome/Edge). If not set, you will be prompted during export.','n.mdSubFolder':'Creates subfolders automatically when exporting to the local folder, for easy organization','n.imgExportDir':'Pre-select image export folder (Chrome/Edge). If not set, you will be prompted during export.','n.imgSubFolder':'Creates subfolders automatically when exporting images to the local folder, for easy organization','n.exportAvatars':'Export all character and user avatars to a folder. If folder selection is not supported, files will be downloaded to the default download folder.','n.maxFileSize':'Recommended max 50KB, otherwise Obsidian may lag when opening large files.','n.emojiExportDir':'Same as above',
+    'b.reconnect':'🔄 Reconnect','b.exportAvatars':'📷 Export Avatars','b.chooseMdDir':'📁 Choose MD Export Folder','b.chooseImgDir':'📁 Choose Image Export Folder','b.chooseEmojiDir':'📁 Choose Emoji Export Folder','b.newTemplate':'＋ New Template','b.exportTemplate':'📤 Export Template','b.importTemplate':'📥 Import Template','b.save':'💾 Save','b.reset':'↺ Reset','b.exportSettings':'📤 Export Settings','b.importSettings':'📥 Import Settings','b.copySelected':'📋 Copy Selected','b.exportMd':'📄 Export MD','b.clear':'✕ Clear','b.batchExport':'🗂 Batch Export MD','b.go':'GO',
     'tab.private':'Private','tab.group':'Group',
     'ui.searchPlaceholder':'Search characters/groups…','ui.msgSearchPlaceholder':'Space-separated keywords (content/ID/role/date), +expand -exclude','ui.selectAllPrefix':'Selected','ui.selectAllMsg':'messages and','ui.selectAllImg':'images','ui.selectAllHint':'Check two non-consecutive messages to auto-select all between them','ui.exportFromLabel':'Exported up to ID:','ui.pageJump':'Jump','ui.exportOverlay':'Exporting, please wait…','ui.chatTitlePlaceholder':'← Select a chat from the left','ui.selectChatHint':'Select a chat from the left','ui.notSet':'Not set, will prompt during export','ui.folderSelected':'Selected: ','ui.subtitle':'View & Select Copy','ui.exportOverlayBatch':'Batch exporting {count} MD files…','ui.pageTitle':'Linshe · Chat Exporter','ui.headerTitle':'📋 Linshe · Chat Exporter','ui.connected':'Connected','ui.checkingConnection':'Checking connection…','ui.connectFailed':'Connection failed','ui.selectImg':'Select this image','ui.exportAllTitle':'Batch export messages from the entered ID to the end by date (0 = export all)','ui.settingsPage':'Settings Page',
     'ui.noResults':'No matching results','ui.noData':'No data','ui.noSearchResults':'No matching messages','ui.tryOtherKeywords':'Try other keywords','ui.noMessages':'No messages yet','ui.msgCount':'{count} total','ui.filteredCount':'{total} total · {filtered} filtered','ui.loadingMessages':'Loading messages…',
@@ -1255,10 +1267,35 @@ function buildImageUrl(originalUrl, date) {
   const base = name.replace(/\.[^.]+$/, ''); // strip extension
   if (!base) return '';
   const ext = settings.imgExt || 'png';
+  // 判断是否为表情包：链接含 /emoji/
+  if (originalUrl && originalUrl.indexOf('/emoji/') !== -1) {
+    const encoded = encodeURIComponent(base + '.' + ext);
+    if (settings.emojiPrefix) {
+      return replaceFileNameVars(settings.emojiPrefix, { date: date || new Date() }) + encoded;
+    }
+    return encoded;
+  }
   if (settings.imgPrefix) {
     return replaceFileNameVars(settings.imgPrefix, { date: date || new Date() }) + base + '.' + ext;
   }
   return base + '.' + ext;
+}
+
+// 判断是否为表情包图片链接
+function isEmojiUrl(url) {
+  return url && url.indexOf('/emoji/') !== -1;
+}
+// 将图片列表分为普通图片和表情包图片
+function splitEmojiImages(imgs) {
+  const normal = [], emoji = [];
+  for (const img of imgs) {
+    if (isEmojiUrl(img.url)) {
+      emoji.push(img);
+    } else {
+      normal.push(img);
+    }
+  }
+  return { normal, emoji };
 }
 
 // ── State ──
@@ -1451,6 +1488,7 @@ function fillSettingsPanel() {
   $('setUserName').value = settings.userName;
   $('setFacePrefix').value = settings.facePrefix;
   $('setImgPrefix').value = settings.imgPrefix;
+  $('setEmojiPrefix').value = settings.emojiPrefix;
   $('setImgExt').value = settings.imgExt;
   const imgMaxKBEl = $('setImgMaxKB');
   if (imgMaxKBEl) imgMaxKBEl.value = String(settings.imgMaxKB || 0);
@@ -1495,6 +1533,7 @@ function onSettingChange() {
   settings.userName = ($('setUserName').value || '').trim() || '我';
   settings.facePrefix = ($('setFacePrefix').value || '').trim();
   settings.imgPrefix = ($('setImgPrefix').value || '').trim();
+  settings.emojiPrefix = ($('setEmojiPrefix').value || '').trim();
   settings.imgExt = $('setImgExt').value || 'png';
   settings.imgMaxKB = Math.max(0, parseInt(($('setImgMaxKB') || {}).value, 10) || 0);
   settings.chatTitle = ($('setChatTitle').value || '').trim() || '{{role}}';
@@ -2039,6 +2078,7 @@ function openObsidianNew(relPath, content, silent) {
 // 支持环境（Chrome/Edge）下，用户可预先指定 md / 图片的导出文件夹（句柄存入 IndexedDB，下次自动恢复）
 let mdExportDirHandle = null;
 let imgExportDirHandle = null;
+let emojiExportDirHandle = null;
 let avatarExportDirHandle = null;
 const HANDLE_DB = 'linsheExporterHandles';
 const HANDLE_STORE = 'handles';
@@ -2131,6 +2171,7 @@ async function chooseExportDir(which) {
     const handle = await window.showDirectoryPicker({ mode: 'readwrite' });
     if (which === 'md') mdExportDirHandle = handle;
     else if (which === 'img') imgExportDirHandle = handle;
+    else if (which === 'emoji') emojiExportDirHandle = handle;
     else if (which === 'avatar') avatarExportDirHandle = handle;
     try { await idbSet(which + 'ExportDir', handle); } catch (e) {}
     updateExportDirLabels();
@@ -2142,7 +2183,7 @@ async function chooseExportDir(which) {
 // 确保取得导出文件夹句柄：已设置直接返回；未设置时弹窗选择（弹窗前提示文本）；
 // 不支持的环境或用户取消返回 null（调用方回退默认下载）
 async function ensureExportDir(which) {
-  const existing = which === 'md' ? mdExportDirHandle : (which === 'img' ? imgExportDirHandle : avatarExportDirHandle);
+  const existing = which === 'md' ? mdExportDirHandle : (which === 'img' ? imgExportDirHandle : (which === 'emoji' ? emojiExportDirHandle : avatarExportDirHandle));
   if (existing) return existing;
   if (!window.showDirectoryPicker) return null;
   // 内存中无句柄：尝试从 IndexedDB 加载并请求权限（此时有用户手势，requestPermission 会生效）
@@ -2153,6 +2194,7 @@ async function ensureExportDir(which) {
       if (restored) {
         if (which === 'md') mdExportDirHandle = restored;
         else if (which === 'img') imgExportDirHandle = restored;
+        else if (which === 'emoji') emojiExportDirHandle = restored;
         else if (which === 'avatar') avatarExportDirHandle = restored;
         updateExportDirLabels();
         return restored;
@@ -2166,6 +2208,7 @@ async function ensureExportDir(which) {
     const handle = await window.showDirectoryPicker({ mode: 'readwrite' });
     if (which === 'md') mdExportDirHandle = handle;
     else if (which === 'img') imgExportDirHandle = handle;
+    else if (which === 'emoji') emojiExportDirHandle = handle;
     else if (which === 'avatar') avatarExportDirHandle = handle;
     try { await idbSet(which + 'ExportDir', handle); } catch (e) {}
     updateExportDirLabels();
@@ -2180,6 +2223,8 @@ function updateExportDirLabels() {
   if (mdEl) mdEl.textContent = mdExportDirHandle ? `${t('ui.folderSelected')}${mdExportDirHandle.name}` : t('ui.notSet');
   const imgEl = $('imgExportDirLabel');
   if (imgEl) imgEl.textContent = imgExportDirHandle ? `${t('ui.folderSelected')}${imgExportDirHandle.name}` : t('ui.notSet');
+  const emojiEl = $('emojiExportDirLabel');
+  if (emojiEl) emojiEl.textContent = emojiExportDirHandle ? `${t('ui.folderSelected')}${emojiExportDirHandle.name}` : t('ui.notSet');
   const avatarEl = $('avatarExportDirLabel');
   if (avatarEl) avatarEl.textContent = avatarExportDirHandle ? `${t('ui.folderSelected')}${avatarExportDirHandle.name}` : t('ui.notSet');
 }
@@ -2207,12 +2252,14 @@ async function restoreExportDirs() {
   try {
     const mdH = await idbGet('mdExportDir') || null;
     const imgH = await idbGet('imgExportDir') || null;
+    const emojiH = await idbGet('emojiExportDir') || null;
     const avatarH = await idbGet('avatarExportDir') || null;
     // 仅恢复权限已就绪的句柄。requestPermission 需要用户手势才能生效，
     // 页面加载时无手势，此处不尝试请求权限，也不删除 IndexedDB 中的句柄。
     // 未恢复的句柄等用户点击按钮时由 ensureExportDir 重新加载 + 请求权限。
     if (mdH && await isHandleUsable(mdH)) mdExportDirHandle = mdH;
     if (imgH && await isHandleUsable(imgH)) imgExportDirHandle = imgH;
+    if (emojiH && await isHandleUsable(emojiH)) emojiExportDirHandle = emojiH;
     if (avatarH && await isHandleUsable(avatarH)) avatarExportDirHandle = avatarH;
   } catch (e) {}
   updateExportDirLabels();
@@ -4920,26 +4967,42 @@ function getSelectedImageLines(m, forceAll, date) {
 async function downloadSelectedImagesCore() {
   const imgs = collectSelectedImages();
   if (imgs.length === 0) return;
+  // 分离表情包图片和普通图片
+  const { normal, emoji } = splitEmojiImages(imgs);
   // 仅使用"已设置的图片导出文件夹"句柄；不在此处弹窗选择——
   // 本函数可能在复制后的异步回调中被调用（用户手势已失效，showDirectoryPicker 会被浏览器拒绝），
   // 未设置句柄时直接下载到浏览器默认下载文件夹并在 toast 说明
-  const imgDir = imgExportDirHandle;
-  if (imgDir) {
-    // 子文件夹在回调内解析/创建：重试时 writeToDirOrFallback 传入的是重新选择的根句柄，
-    // 在此重新创建子文件夹，避免文件夹中途失效后图片误写入根目录
-    await writeToDirOrFallback('img', imgDir, async (dir) => {
-      let target = dir;
-      if (settings.imgSubFolderEnabled) {
-        const subPath = resolveSubFolderPath(settings.imgSubFolder, getExportCtx());
-        if (subPath) target = await getOrCreateSubDir(dir, subPath);
-      }
-      await downloadImagesToDir(imgs, target);
-    }, async () => {
-      await downloadImagesBatched(imgs, null);
-    });
-  } else {
-    // 未设置图片文件夹：改用 ZIP 打包下载
-    await downloadImagesBatched(imgs, null);
+  // 处理普通图片
+  if (normal.length > 0) {
+    const imgDir = imgExportDirHandle;
+    if (imgDir) {
+      await writeToDirOrFallback('img', imgDir, async (dir) => {
+        let target = dir;
+        if (settings.imgSubFolderEnabled) {
+          const subPath = resolveSubFolderPath(settings.imgSubFolder, getExportCtx());
+          if (subPath) target = await getOrCreateSubDir(dir, subPath);
+        }
+        await downloadImagesToDir(normal, target);
+      }, async () => {
+        await downloadImagesBatched(normal, null);
+      });
+    } else {
+      await downloadImagesBatched(normal, null);
+    }
+  }
+  // 处理表情包图片
+  if (emoji.length > 0) {
+    const emojiDir = emojiExportDirHandle || imgExportDirHandle;
+    if (emojiDir) {
+      await writeToDirOrFallback('emoji', emojiDir, async (dir) => {
+        // 表情包不创建子文件夹
+        await downloadImagesToDir(emoji, dir);
+      }, async () => {
+        await downloadImagesBatched(emoji, null);
+      });
+    } else {
+      await downloadImagesBatched(emoji, null);
+    }
   }
 }
 // 包装：选中图片数 > 10 时显示遮罩，try/finally 保证任何分支结束后都移除
