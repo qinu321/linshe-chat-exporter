@@ -1297,6 +1297,15 @@ function splitEmojiImages(imgs) {
   }
   return { normal, emoji };
 }
+// 表情包图片按 URL 去重（相同链接只保留第一个）
+function deduplicateEmojiByUrl(emojiImgs) {
+  const seen = new Set();
+  return emojiImgs.filter(img => {
+    if (seen.has(img.url)) return false;
+    seen.add(img.url);
+    return true;
+  });
+}
 
 // ── State ──
 let state = {
@@ -1634,6 +1643,7 @@ function importSettings() {
         if (!CHATBOX_STYLE_VALUES.includes(merged.chatboxStyle)) merged.chatboxStyle = DEFAULT_SETTINGS.chatboxStyle;
         if (merged.imgExt !== 'png' && merged.imgExt !== 'avif') merged.imgExt = DEFAULT_SETTINGS.imgExt;
         if (typeof merged.mdMaxKB !== 'number' || merged.mdMaxKB < 1 || merged.mdMaxKB > 500) merged.mdMaxKB = DEFAULT_SETTINGS.mdMaxKB;
+        if (typeof merged.emojiPrefix !== 'string') merged.emojiPrefix = DEFAULT_SETTINGS.emojiPrefix;
         // 校验 md 模板：导入的 default 模板直接覆盖，非 default 模板追加到默认列表后
         {
           // 提取导入的 default 模板内容（如果有）
@@ -2128,6 +2138,9 @@ function clearExportDir(which) {
   } else if (which === 'img') {
     imgExportDirHandle = null;
     idbDel('imgExportDir').catch(() => {});
+  } else if (which === 'emoji') {
+    emojiExportDirHandle = null;
+    idbDel('emojiExportDir').catch(() => {});
   } else if (which === 'avatar') {
     avatarExportDirHandle = null;
     idbDel('avatarExportDir').catch(() => {});
@@ -2138,7 +2151,7 @@ function clearExportDir(which) {
 // 返回新句柄；用户取消或环境不支持时返回 null（调用方回退默认下载）
 async function reselectExportDir(which) {
   clearExportDir(which);
-  showToast(which === 'md' ? t('t.dirNotFound', {which: 'md'}) : t('t.dirNotFound', {which: 'img'}), 'error');
+  showToast(which === 'md' ? t('t.dirNotFound', {which: 'md'}) : (which === 'emoji' ? t('t.dirNotFound', {which: 'emoji'}) : t('t.dirNotFound', {which: 'img'})), 'error');
   return await ensureExportDir(which);
 }
 // 写入/下载到文件夹；文件夹不存在时自动重新选择一次并重试；
@@ -2402,11 +2415,17 @@ async function exportSelectedMdImpl() {
   // 已消耗而失败（浏览器拒绝第二次 showDirectoryPicker），表现为"只弹出一个选择框"。
   let mdDir = null;
   let imgDir = null;
+  let emojiDir = null;
   if (!settings.mdDirectObsidian) {
     mdDir = await ensureExportDir('md');
   }
   if (imgs.length > 0) {
     imgDir = await ensureExportDir('img');
+    // 检查是否有表情包图片，如有则提示选择表情包文件夹
+    const { emoji } = splitEmojiImages(imgs);
+    if (emoji.length > 0 && !emojiExportDirHandle) {
+      emojiDir = await ensureExportDir('emoji');
+    }
   }
   if (settings.mdDirectObsidian) {
     const folder = getMdSubFolder(ctx);
@@ -2453,7 +2472,11 @@ async function exportSelectedMdImpl() {
         const zipEntries = [];
         const encoder = new TextEncoder();
         zipEntries.push({ name: fileName, data: encoder.encode(content) });
-        await _batchFetchImagesToZip(imgs, zipEntries);
+        // 表情包去重后合并到同一个 ZIP
+        const { normal, emoji } = splitEmojiImages(imgs);
+        const emojiUnique = deduplicateEmojiByUrl(emoji);
+        const allImgs = normal.concat(emojiUnique);
+        await _batchFetchImagesToZip(allImgs, zipEntries);
         if (zipEntries.length > 0) {
           const zipName = `${fileName.replace(/\.md$/, '')}_${new Date().toISOString().slice(0, 10)}.zip`;
           downloadZipBlob(createZipBlob(zipEntries), zipName);
@@ -2471,7 +2494,11 @@ async function exportSelectedMdImpl() {
     const zipEntries = [];
     const encoder = new TextEncoder();
     zipEntries.push({ name: fileName, data: encoder.encode(content) });
-    await _batchFetchImagesToZip(imgs, zipEntries);
+    // 表情包去重后合并到同一个 ZIP
+    const { normal, emoji } = splitEmojiImages(imgs);
+    const emojiUnique = deduplicateEmojiByUrl(emoji);
+    const allImgs = normal.concat(emojiUnique);
+    await _batchFetchImagesToZip(allImgs, zipEntries);
     if (zipEntries.length > 0) {
       const zipName = `${fileName.replace(/\.md$/, '')}_${new Date().toISOString().slice(0, 10)}.zip`;
       downloadZipBlob(createZipBlob(zipEntries), zipName);
@@ -2483,23 +2510,40 @@ async function exportSelectedMdImpl() {
   }
   // 导出图片（仅当 md 已写入文件夹时，否则已在 ZIP 中一并处理）
   if (imgs.length > 0 && mdDir) {
-    if (imgDir) {
-      // 子文件夹在回调内解析/创建：重试时 writeToDirOrFallback 传入的是重新选择的根句柄，
-      // 在此重新创建子文件夹，避免文件夹中途失效后图片误写入根目录
-      await writeToDirOrFallback('img', imgDir, async (dir) => {
-        let target = dir;
-        if (settings.imgSubFolderEnabled) {
-          const subPath = resolveSubFolderPath(settings.imgSubFolder, ctx);
-          if (subPath) target = await getOrCreateSubDir(dir, subPath);
-        }
-        await downloadImagesToDir(imgs, target);
-      }, async () => {
-        await downloadImagesBatched(imgs, null);
-      });
-    } else {
-      // 未选择图片文件夹：改用 ZIP 打包下载（避免多文件被拦截）
-      if (!confirmZipDownload(imgs.length)) return;
-      await downloadImagesBatched(imgs, null);
+    const { normal, emoji } = splitEmojiImages(imgs);
+    const emojiUnique = deduplicateEmojiByUrl(emoji);
+    // 处理普通图片
+    if (normal.length > 0) {
+      if (imgDir) {
+        await writeToDirOrFallback('img', imgDir, async (dir) => {
+          let target = dir;
+          if (settings.imgSubFolderEnabled) {
+            const subPath = resolveSubFolderPath(settings.imgSubFolder, ctx);
+            if (subPath) target = await getOrCreateSubDir(dir, subPath);
+          }
+          await downloadImagesToDir(normal, target);
+        }, async () => {
+          await downloadImagesBatched(normal, null);
+        });
+      } else {
+        if (!confirmZipDownload(normal.length)) return;
+        await downloadImagesBatched(normal, null);
+      }
+    }
+    // 处理表情包图片
+    if (emojiUnique.length > 0) {
+      const emojiTargetDir = emojiDir || emojiExportDirHandle || imgDir;
+      if (emojiTargetDir) {
+        await writeToDirOrFallback('emoji', emojiTargetDir, async (dir) => {
+          // 表情包不创建子文件夹
+          await downloadImagesToDir(emojiUnique, dir);
+        }, async () => {
+          await downloadImagesBatched(emojiUnique, null);
+        });
+      } else {
+        if (!confirmZipDownload(emojiUnique.length)) return;
+        await downloadImagesBatched(emojiUnique, null);
+      }
     }
     if (state.interruptExport && state.interruptReason === 'imgSize') {
       showToast(t('t.imgSizeSkipped'), 'error');
@@ -2545,22 +2589,35 @@ async function exportAllMdCore() {
   const hasAnyImages = forceAllImages && (() => {
     for (const m of rangeMsgs) {
       if (m.images && m.images !== 'null' && m.images !== '[]') {
-        // 快速检查 images 字段非空即视为有图，无需解析具体 URL
         return true;
       }
     }
     return false;
   })();
+  // 轻量检查是否有表情包图片（仅检查字符串是否含 /emoji/，不解析 JSON）
+  let hasEmojiImages = false;
+  if (hasAnyImages && forceAllImages && !emojiExportDirHandle) {
+    for (const m of rangeMsgs) {
+      if (m.images && typeof m.images === 'string' && m.images.indexOf('/emoji/') !== -1) {
+        hasEmojiImages = true;
+        break;
+      }
+    }
+  }
   // 在用户手势窗口内先取得文件夹句柄（已预先设置则直接使用；未设置则弹窗）。
   // 优先使用文件夹导出（可去重、子文件夹、增量导出）；
   // 用户取消选择或浏览器不支持 showDirectoryPicker → 自动回退到 ZIP 打包
   let mdDirHandle = null;
   let imgDirHandle = null;
+  let emojiDirHandle = null;
   if (window.showDirectoryPicker) {
     mdDirHandle = await ensureExportDir('md');
     if (hasAnyImages) {
       imgDirHandle = await ensureExportDir('img');
     }
+  }
+  if (hasEmojiImages && !emojiExportDirHandle && window.showDirectoryPicker) {
+    emojiDirHandle = await ensureExportDir('emoji');
   }
   // 按大小分割：每个日期组内容超过设定值KB时继续分割，使每个 md 文件不超过设定值KB
   //（大致范围，可上下波动；单条消息本身超限时允许该条独占一个文件）
@@ -2610,21 +2667,38 @@ async function exportAllMdCore() {
     if (forceAllImages) {
       const batchImgs = collectImagesForMsgs(batches[i].msgs, true);
       if (batchImgs.length > 0) {
-        if (imgDirHandle) {
-          // 文件夹模式：写入子文件夹
-          const batchT = firstValidMsgTime(batches[i].msgs) || new Date(batches[i].day + 'T12:00:00');
-          const batchImgCtx = getExportCtx(batchT);
-          await writeToDirOrFallback('img', imgDirHandle, async (dir) => {
-            let target = dir;
-            const imgSubPath = resolveSubFolderPath(settings.imgSubFolder, batchImgCtx);
-            if (imgSubPath) target = await getOrCreateSubDir(dir, imgSubPath);
-            await downloadImagesToDir(batchImgs, target);
-          }, async () => {
-            await downloadImagesBatched(batchImgs, null);
-          });
-        } else if (zipEntries) {
-          // ZIP 模式：fetch 图片并添加到 ZIP
-          await fetchImagesForZip(batchImgs, zipEntries);
+        const { normal, emoji } = splitEmojiImages(batchImgs);
+        const emojiUnique = deduplicateEmojiByUrl(emoji);
+        // 处理普通图片
+        if (normal.length > 0) {
+          if (imgDirHandle) {
+            const batchT = firstValidMsgTime(batches[i].msgs) || new Date(batches[i].day + 'T12:00:00');
+            const batchImgCtx = getExportCtx(batchT);
+            await writeToDirOrFallback('img', imgDirHandle, async (dir) => {
+              let target = dir;
+              const imgSubPath = resolveSubFolderPath(settings.imgSubFolder, batchImgCtx);
+              if (imgSubPath) target = await getOrCreateSubDir(dir, imgSubPath);
+              await downloadImagesToDir(normal, target);
+            }, async () => {
+              await downloadImagesBatched(normal, null);
+            });
+          } else if (zipEntries) {
+            await fetchImagesForZip(normal, zipEntries);
+          }
+        }
+        // 处理表情包图片
+        if (emojiUnique.length > 0) {
+          const emojiTarget = emojiDirHandle || emojiExportDirHandle || imgDirHandle;
+          if (emojiTarget) {
+            await writeToDirOrFallback('emoji', emojiTarget, async (dir) => {
+              // 表情包不创建子文件夹
+              await downloadImagesToDir(emojiUnique, dir);
+            }, async () => {
+              await downloadImagesBatched(emojiUnique, null);
+            });
+          } else if (zipEntries) {
+            await fetchImagesForZip(emojiUnique, zipEntries);
+          }
         }
       }
     }
@@ -2768,10 +2842,18 @@ async function exportAllImagesOnly() {
     showToast(t('t.noImagesToExport'), 'info');
     return;
   }
+  // 一次性分离表情包和普通图片（后续循环不再重复遍历）
+  const { normal: allNormal, emoji: allEmoji } = splitEmojiImages(allImgs);
+  const allEmojiUnique = deduplicateEmojiByUrl(allEmoji);
   // 尝试获取文件夹句柄，用户取消选择或浏览器不支持时回退到 ZIP 打包
   let imgDirHandle = null;
+  let emojiDirHandle = null;
   if (window.showDirectoryPicker) {
+    // 先同时请求两个文件夹（均在用户手势窗口内），避免第一个选择后手势失效
     imgDirHandle = await ensureExportDir('img');
+    if (allEmojiUnique.length > 0 && !emojiExportDirHandle) {
+      emojiDirHandle = await ensureExportDir('emoji');
+    }
   }
   // 按日期分组
   const entries = groupMessagesByDate(rangeMsgs);
@@ -2781,7 +2863,7 @@ async function exportAllImagesOnly() {
   let totalDownloaded = 0, totalSkipped = 0;
   const zipEntries = imgDirHandle ? null : [];
   // 先检查文件数量（避免不必要的 fetch）
-  if (zipEntries && !confirmZipDownload(allImgs.length)) return;
+  if (zipEntries && !confirmZipDownload(allNormal.length + allEmojiUnique.length)) return;
   let lastProcessedMsgId = fromId; // 中断时记录最后处理的消息 ID
   for (let i = 0; i < entries.length; i++) {
     const e = entries[i];
@@ -2790,22 +2872,42 @@ async function exportAllImagesOnly() {
       if (e.msgs.length > 0) lastProcessedMsgId = e.msgs[e.msgs.length - 1].id;
       continue;
     }
-    if (imgDirHandle) {
-      const batchT = firstValidMsgTime(e.msgs) || new Date();
-      const batchImgCtx = getExportCtx(batchT);
-      await writeToDirOrFallback('img', imgDirHandle, async (dir) => {
-        let target = dir;
-        const imgSubPath = resolveSubFolderPath(settings.imgSubFolder, batchImgCtx);
-        if (imgSubPath) target = await getOrCreateSubDir(dir, imgSubPath);
-        const stats = await downloadImagesToDir(batchImgs, target);
-        totalDownloaded += stats.downloaded || 0;
-        totalSkipped += stats.skipped || 0;
-      }, async () => {
-        await downloadImagesBatched(batchImgs, null);
-      });
-    } else if (zipEntries) {
-  	  // ZIP 模式：fetch 图片并添加到 ZIP
-      await fetchImagesForZip(batchImgs, zipEntries);
+    const { normal, emoji } = splitEmojiImages(batchImgs);
+    const emojiUnique = deduplicateEmojiByUrl(emoji);
+    // 处理普通图片
+    if (normal.length > 0) {
+      if (imgDirHandle) {
+        const batchT = firstValidMsgTime(e.msgs) || new Date();
+        const batchImgCtx = getExportCtx(batchT);
+        await writeToDirOrFallback('img', imgDirHandle, async (dir) => {
+          let target = dir;
+          const imgSubPath = resolveSubFolderPath(settings.imgSubFolder, batchImgCtx);
+          if (imgSubPath) target = await getOrCreateSubDir(dir, imgSubPath);
+          const stats = await downloadImagesToDir(normal, target);
+          totalDownloaded += stats.downloaded || 0;
+          totalSkipped += stats.skipped || 0;
+        }, async () => {
+          await downloadImagesBatched(normal, null);
+        });
+      } else if (zipEntries) {
+        await fetchImagesForZip(normal, zipEntries);
+      }
+    }
+    // 处理表情包图片
+    if (emojiUnique.length > 0) {
+      const emojiTarget = emojiDirHandle || emojiExportDirHandle || imgDirHandle;
+      if (emojiTarget) {
+        await writeToDirOrFallback('emoji', emojiTarget, async (dir) => {
+          // 表情包不创建子文件夹
+          const stats = await downloadImagesToDir(emojiUnique, dir);
+          totalDownloaded += stats.downloaded || 0;
+          totalSkipped += stats.skipped || 0;
+        }, async () => {
+          await downloadImagesBatched(emojiUnique, null);
+        });
+      } else if (zipEntries) {
+        await fetchImagesForZip(emojiUnique, zipEntries);
+      }
     }
     if (e.msgs.length > 0) lastProcessedMsgId = e.msgs[e.msgs.length - 1].id;
     if (state.interruptExport) break;
@@ -3241,10 +3343,19 @@ function downloadZipBlob(blob, zipName) {
 // 返回失败张数
 async function _batchFetchImagesToZip(imgs, zipEntries, batchSize = 5) {
   if (!imgs || imgs.length === 0 || !zipEntries) return 0;
+  // 按文件名去重：同一文件名只保留第一个，避免 ZIP 中重复条目
+  const seenNames = new Set();
+  const uniqueImgs = imgs.filter(img => {
+    const rawName = img.url.split('/').pop() || '';
+    const filename = rawName.replace(/.[^.]+$/, '') + '.' + (settings.imgExt || 'png');
+    if (seenNames.has(filename)) return false;
+    seenNames.add(filename);
+    return true;
+  });
   let failed = 0;
-  for (let i = 0; i < imgs.length; i += batchSize) {
+  for (let i = 0; i < uniqueImgs.length; i += batchSize) {
     if (state.interruptExport) break;
-    const batch = imgs.slice(i, i + batchSize);
+    const batch = uniqueImgs.slice(i, i + batchSize);
     const results = await Promise.all(batch.map(async (img) => {
       if (state.interruptExport) return false;
       const rawName = img.url.split('/').pop() || `image_${Date.now()}`;
@@ -3270,7 +3381,7 @@ async function _batchFetchImagesToZip(imgs, zipEntries, batchSize = 5) {
     }));
     failed += results.filter(r => r === false).length;
     if (state.interruptExport) break;
-    if (i + batchSize < imgs.length) await new Promise(r => setTimeout(r, 300));
+    if (i + batchSize < uniqueImgs.length) await new Promise(r => setTimeout(r, 300));
   }
   return failed;
 }
@@ -4956,7 +5067,7 @@ function getSelectedImageLines(m, forceAll, date) {
     if (forceAll || state.selectedImgKeys.has(key)) {
       const fullUrl = resolveMediaUrl(url);
       const md = buildImageUrl(fullUrl, date);
-      if (md) lines.push(md);
+      if (md) lines.push({ text: md, isEmoji: isEmojiUrl(fullUrl) });
     }
   });
   return lines;
@@ -4967,16 +5078,28 @@ function getSelectedImageLines(m, forceAll, date) {
 async function downloadSelectedImagesCore() {
   const imgs = collectSelectedImages();
   if (imgs.length === 0) return;
-  // 分离表情包图片和普通图片
+  // 分离表情包图片和普通图片，表情包按 URL 去重
   const { normal, emoji } = splitEmojiImages(imgs);
+  const emojiUnique = deduplicateEmojiByUrl(emoji);
   // 仅使用"已设置的图片导出文件夹"句柄；不在此处弹窗选择——
   // 本函数可能在复制后的异步回调中被调用（用户手势已失效，showDirectoryPicker 会被浏览器拒绝），
   // 未设置句柄时直接下载到浏览器默认下载文件夹并在 toast 说明
+  const hasNormal = normal.length > 0;
+  const hasEmoji = emojiUnique.length > 0;
+  // 判断是否都回退到 ZIP 打包（无文件夹句柄或 fallback 时），此时合并到一个 ZIP
+  const normalDir = imgExportDirHandle;
+  const emojiDir = emojiExportDirHandle || imgExportDirHandle;
+  const bothZip = hasNormal && hasEmoji && !normalDir && !emojiDir;
+  if (bothZip) {
+    // 合并到一个 ZIP 下载
+    const allImgs = normal.concat(emojiUnique);
+    await downloadImagesBatched(allImgs, null);
+    return;
+  }
   // 处理普通图片
-  if (normal.length > 0) {
-    const imgDir = imgExportDirHandle;
-    if (imgDir) {
-      await writeToDirOrFallback('img', imgDir, async (dir) => {
+  if (hasNormal) {
+    if (normalDir) {
+      await writeToDirOrFallback('img', normalDir, async (dir) => {
         let target = dir;
         if (settings.imgSubFolderEnabled) {
           const subPath = resolveSubFolderPath(settings.imgSubFolder, getExportCtx());
@@ -4991,17 +5114,16 @@ async function downloadSelectedImagesCore() {
     }
   }
   // 处理表情包图片
-  if (emoji.length > 0) {
-    const emojiDir = emojiExportDirHandle || imgExportDirHandle;
+  if (hasEmoji) {
     if (emojiDir) {
       await writeToDirOrFallback('emoji', emojiDir, async (dir) => {
         // 表情包不创建子文件夹
-        await downloadImagesToDir(emoji, dir);
+        await downloadImagesToDir(emojiUnique, dir);
       }, async () => {
-        await downloadImagesBatched(emoji, null);
+        await downloadImagesBatched(emojiUnique, null);
       });
     } else {
-      await downloadImagesBatched(emoji, null);
+      await downloadImagesBatched(emojiUnique, null);
     }
   }
 }
@@ -5410,9 +5532,14 @@ function buildMarkdownFormat(msgs, opts) {
       const shouldOutputImg = isMsgSelected || !forceAllImages;
       if (shouldOutputImg) {
         const imgFlag = isMsgSelected ? forceAllImages : false;
-        for (const imgMd of getSelectedImageLines(m, imgFlag, exportDate)) {
+        for (const imgInfo of getSelectedImageLines(m, imgFlag, exportDate)) {
           // Obsidian 直传模式下，图片引用带上图片文件夹前缀（如 图片文件夹/xxx.png）
-          lines.push(`> ![image](${imgFolderRel ? imgFolderRel + '/' + imgMd : imgMd})`);
+          const imgUrl = imgFolderRel ? imgFolderRel + '/' + imgInfo.text : imgInfo.text;
+          if (imgInfo.isEmoji) {
+            lines.push(`> - ![image|140](${imgUrl})`);
+          } else {
+            lines.push(`> ![image](${imgUrl})`);
+          }
         }
       }
     }
@@ -5433,7 +5560,7 @@ function buildMarkdownFormat(msgs, opts) {
     let firstMsg = msgs[0];
     if (!firstMsg) {
       for (const m of state.currentMessages) {
-        if (getSelectedImageLines(m, forceAllImages, exportDate).length > 0) { firstMsg = m; break; }
+        if (getSelectedImageLines(m, forceAllImages, exportDate).length > 0) { firstMsg = m; break; } // still works with objects
       }
     }
     const dt = formatDateTimeParts(firstMsg && firstMsg.created_at);
