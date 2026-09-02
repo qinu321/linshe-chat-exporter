@@ -5478,7 +5478,7 @@ function buildMarkdownFormat(msgs, opts) {
         lines.push(`> - ![face](${avatarUrl}) *${speaker}* ${content}`);
       } else if (settings.mergeConsecutive) {
         // Same character continuing (merge)
-        lines.push(`> ${content}`);
+        if (content.trim()) lines.push(`> ${content}`);
       } else {
         // Same character continuing (no merge)
         let line = `> - ${content}`;
@@ -5506,7 +5506,7 @@ function buildMarkdownFormat(msgs, opts) {
             }
           }
         }
-        lines.push(line);
+        if (line.trim() !== '>' && line.trim() !== '> -') lines.push(line);
         }
         // 角色/图片→时间分割线→角色 时，为下一条角色发言补充 face 链接
         if (tdFixNextRole && !isUser) {
