@@ -2585,23 +2585,22 @@ async function exportAllMdCore() {
   // 文件名时间用该日期 12:00 兜底；若没有前一个文件（序列第一个文件），日期使用当前日期
   const entries = groupMessagesByDate(rangeMsgs);
   const forceAllImages = !!settings.autoSelectImages;
-  // 轻量检查是否有图片（替代 collectImagesForMsgs 全量构建，避免大对话时不必要的 JSON.parse 和 URL 构建）
-  const hasAnyImages = forceAllImages && (() => {
-    for (const m of rangeMsgs) {
-      if (m.images && m.images !== 'null' && m.images !== '[]') {
-        return true;
-      }
-    }
-    return false;
-  })();
-  // 轻量检查是否有表情包图片（仅检查字符串是否含 /emoji/，不解析 JSON）
+  // 一次性预计算所有图片信息（后续循环直接按批次过滤，无需重复遍历和解析 JSON）
+  let allRangeImgs = [];
+  let allNormal = [];
+  let allEmoji = [];
+  let allEmojiUnique = [];
+  let hasAnyImages = false;
   let hasEmojiImages = false;
-  if (hasAnyImages && forceAllImages && !emojiExportDirHandle) {
-    for (const m of rangeMsgs) {
-      if (m.images && typeof m.images === 'string' && m.images.indexOf('/emoji/') !== -1) {
-        hasEmojiImages = true;
-        break;
-      }
+  if (forceAllImages) {
+    allRangeImgs = collectImagesForMsgs(rangeMsgs, true);
+    hasAnyImages = allRangeImgs.length > 0;
+    if (hasAnyImages) {
+      const split = splitEmojiImages(allRangeImgs);
+      allNormal = split.normal;
+      allEmoji = split.emoji;
+      allEmojiUnique = deduplicateEmojiByUrl(allEmoji);
+      hasEmojiImages = allEmoji.length > 0 && !emojiExportDirHandle;
     }
   }
   // 在用户手势窗口内先取得文件夹句柄（已预先设置则直接使用；未设置则弹窗）。
@@ -2636,6 +2635,7 @@ async function exportAllMdCore() {
   let currentMdDir = mdDirHandle;
   let prevActualName = ''; // 上一个 md 实际写入的文件名（不含 .md 后缀），第一个文件为空
   let exportedCount = 0, skippedCount = 0;
+  const seenZipNames = new Set(); // ZIP 包全局去重，跨批次同名文件只保留第一个
   for (let i = 0; i < batches.length; i++) {
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
@@ -2664,13 +2664,14 @@ async function exportAllMdCore() {
       }
     }
     // 当前批次的图片（仅选项开启时导出，不读取用户手动选择）
-    if (forceAllImages) {
-      const batchImgs = collectImagesForMsgs(batches[i].msgs, true);
-      if (batchImgs.length > 0) {
-        const { normal, emoji } = splitEmojiImages(batchImgs);
-        const emojiUnique = deduplicateEmojiByUrl(emoji);
+    if (forceAllImages && hasAnyImages) {
+      // 用预计算的图片数据按批次过滤，避免重复遍历消息和解析 JSON
+      const batchMsgIds = new Set(batches[i].msgs.map(m => m.id));
+      const batchNormal = allNormal.filter(img => batchMsgIds.has(img.msgId));
+      const batchEmojiUnique = allEmojiUnique.filter(img => batchMsgIds.has(img.msgId));
+      if (batchNormal.length > 0 || batchEmojiUnique.length > 0) {
         // 处理普通图片
-        if (normal.length > 0) {
+        if (batchNormal.length > 0) {
           if (imgDirHandle) {
             const batchT = firstValidMsgTime(batches[i].msgs) || new Date(batches[i].day + 'T12:00:00');
             const batchImgCtx = getExportCtx(batchT);
@@ -2678,26 +2679,26 @@ async function exportAllMdCore() {
               let target = dir;
               const imgSubPath = resolveSubFolderPath(settings.imgSubFolder, batchImgCtx);
               if (imgSubPath) target = await getOrCreateSubDir(dir, imgSubPath);
-              await downloadImagesToDir(normal, target);
+              await downloadImagesToDir(batchNormal, target);
             }, async () => {
-              await downloadImagesBatched(normal, null);
+              await downloadImagesBatched(batchNormal, null);
             });
           } else if (zipEntries) {
-            await fetchImagesForZip(normal, zipEntries);
+            await fetchImagesForZip(batchNormal, zipEntries, seenZipNames);
           }
         }
         // 处理表情包图片
-        if (emojiUnique.length > 0) {
+        if (batchEmojiUnique.length > 0) {
           const emojiTarget = emojiDirHandle || emojiExportDirHandle || imgDirHandle;
           if (emojiTarget) {
             await writeToDirOrFallback('emoji', emojiTarget, async (dir) => {
               // 表情包不创建子文件夹
-              await downloadImagesToDir(emojiUnique, dir);
+              await downloadImagesToDir(batchEmojiUnique, dir);
             }, async () => {
-              await downloadImagesBatched(emojiUnique, null);
+              await downloadImagesBatched(batchEmojiUnique, null);
             });
           } else if (zipEntries) {
-            await fetchImagesForZip(emojiUnique, zipEntries);
+            await fetchImagesForZip(batchEmojiUnique, zipEntries, seenZipNames);
           }
         }
       }
@@ -2865,17 +2866,19 @@ async function exportAllImagesOnly() {
   // 先检查文件数量（避免不必要的 fetch）
   if (zipEntries && !confirmZipDownload(allNormal.length + allEmojiUnique.length)) return;
   let lastProcessedMsgId = fromId; // 中断时记录最后处理的消息 ID
+  const seenZipNames = new Set(); // ZIP 包全局去重，跨批次同名文件只保留第一个
   for (let i = 0; i < entries.length; i++) {
     const e = entries[i];
-    const batchImgs = collectImagesForMsgs(e.msgs, true);
-    if (batchImgs.length === 0) {
+    // 用预计算的图片数据按批次过滤，避免重复遍历消息和解析 JSON
+    const batchMsgIds = new Set(e.msgs.map(m => m.id));
+    const batchNormal = allNormal.filter(img => batchMsgIds.has(img.msgId));
+    const batchEmojiUnique = allEmojiUnique.filter(img => batchMsgIds.has(img.msgId));
+    if (batchNormal.length === 0 && batchEmojiUnique.length === 0) {
       if (e.msgs.length > 0) lastProcessedMsgId = e.msgs[e.msgs.length - 1].id;
       continue;
     }
-    const { normal, emoji } = splitEmojiImages(batchImgs);
-    const emojiUnique = deduplicateEmojiByUrl(emoji);
     // 处理普通图片
-    if (normal.length > 0) {
+    if (batchNormal.length > 0) {
       if (imgDirHandle) {
         const batchT = firstValidMsgTime(e.msgs) || new Date();
         const batchImgCtx = getExportCtx(batchT);
@@ -2883,30 +2886,30 @@ async function exportAllImagesOnly() {
           let target = dir;
           const imgSubPath = resolveSubFolderPath(settings.imgSubFolder, batchImgCtx);
           if (imgSubPath) target = await getOrCreateSubDir(dir, imgSubPath);
-          const stats = await downloadImagesToDir(normal, target);
+          const stats = await downloadImagesToDir(batchNormal, target);
           totalDownloaded += stats.downloaded || 0;
           totalSkipped += stats.skipped || 0;
         }, async () => {
-          await downloadImagesBatched(normal, null);
+          await downloadImagesBatched(batchNormal, null);
         });
       } else if (zipEntries) {
-        await fetchImagesForZip(normal, zipEntries);
+        await fetchImagesForZip(batchNormal, zipEntries, seenZipNames);
       }
     }
     // 处理表情包图片
-    if (emojiUnique.length > 0) {
+    if (batchEmojiUnique.length > 0) {
       const emojiTarget = emojiDirHandle || emojiExportDirHandle || imgDirHandle;
       if (emojiTarget) {
         await writeToDirOrFallback('emoji', emojiTarget, async (dir) => {
           // 表情包不创建子文件夹
-          const stats = await downloadImagesToDir(emojiUnique, dir);
+          const stats = await downloadImagesToDir(batchEmojiUnique, dir);
           totalDownloaded += stats.downloaded || 0;
           totalSkipped += stats.skipped || 0;
         }, async () => {
-          await downloadImagesBatched(emojiUnique, null);
+          await downloadImagesBatched(batchEmojiUnique, null);
         });
       } else if (zipEntries) {
-        await fetchImagesForZip(emojiUnique, zipEntries);
+        await fetchImagesForZip(batchEmojiUnique, zipEntries, seenZipNames);
       }
     }
     if (e.msgs.length > 0) lastProcessedMsgId = e.msgs[e.msgs.length - 1].id;
@@ -3324,8 +3327,8 @@ function createZipBlob(entries) {
 
 // 图片批量打包到 ZIP（异步 fetch 图片 → 添加到 entries 数组），
 // 内部调用统一的 _batchFetchImagesToZip
-async function fetchImagesForZip(imgs, zipEntries) {
-  await _batchFetchImagesToZip(imgs, zipEntries);
+async function fetchImagesForZip(imgs, zipEntries, seenNames) {
+  await _batchFetchImagesToZip(imgs, zipEntries, 5, seenNames);
 }
 
 // 下载 ZIP 文件（浏览器单次下载，不会被拦截）
@@ -3341,13 +3344,14 @@ function downloadZipBlob(blob, zipName) {
 // 统一批次化图片 fetch 到 ZIP entries（每批 5 张，批次间 300ms 喘息）
 // 检查 state.interruptExport 和 settings.imgMaxKB，支持中断
 // 返回失败张数
-async function _batchFetchImagesToZip(imgs, zipEntries, batchSize = 5) {
+async function _batchFetchImagesToZip(imgs, zipEntries, batchSize = 5, seenNames) {
   if (!imgs || imgs.length === 0 || !zipEntries) return 0;
   // 按文件名去重：同一文件名只保留第一个，避免 ZIP 中重复条目
-  const seenNames = new Set();
+  // 使用外部传入的 seenNames 以实现跨批次去重；未传入则创建新 Set
+  if (!seenNames) seenNames = new Set();
   const uniqueImgs = imgs.filter(img => {
     const rawName = img.url.split('/').pop() || '';
-    const filename = rawName.replace(/.[^.]+$/, '') + '.' + (settings.imgExt || 'png');
+    const filename = rawName.replace(/\.[^.]+$/, '') + '.' + (settings.imgExt || 'png');
     if (seenNames.has(filename)) return false;
     seenNames.add(filename);
     return true;
