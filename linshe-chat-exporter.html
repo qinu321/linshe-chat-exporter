@@ -2026,6 +2026,9 @@ function getMdSubFolder(ctx) {
 function renderTemplate(tpl, ctx) {
   const v = s => String(s == null ? '' : s).replace(/\{\{content\}\}/g, 'content');
   const role = (ctx.roleName || ctx.groupName || '');
+  // 检测模板是否将 {{content}} 包裹在反引号中（如 `{{content}}`），
+  // 如果是，正文内容中的反引号需要转义为 \`，避免嵌套反引号破坏 Obsidian 解析
+  const hasBacktickContent = /`\{\{content\}\}`/.test(String(tpl || ''));
   // 单次正则替换替代 10 次 replace 链，从 O(N×K) 降为 O(N)
   return String(tpl || '').replace(/{{(mdFileName|previousFileName|title|date|time|datetime|role|角色名|群聊名字|content)}}/g, (_, key) => {
     switch (key) {
@@ -2036,7 +2039,7 @@ function renderTemplate(tpl, ctx) {
       case 'time': return ctx.timeStr;
       case 'datetime': return ctx.dateStr + ' ' + ctx.timeStr;
       case 'role': case '角色名': case '群聊名字': return v(role);
-      case 'content': return ctx.content;
+      case 'content': return hasBacktickContent ? ctx.content.replace(/`/g, '\\`') : ctx.content;
       default: return '';
     }
   });
@@ -5554,34 +5557,26 @@ function buildMarkdownFormat(msgs, opts) {
     text = header + '\n> \n> ' + dt.date + ' ' + dt.time + '\n' + text;
   }
 
-  // 修复括号斜体跨行：当不合并连续发言时，*（和）*可能在不同行，
-  // 将中间行的 "> - " 替换为 "> "，使 *（...）* 在同一段落内连续渲染
-  if (!settings.mergeConsecutive && text.includes('*（')) {
+  // 修复括号斜体跨行：当不合并连续发言时，*（和）*可能在不同行。
+  // 如果一行中有 *（但没有 ）*，在该行末尾补 * 闭合斜体；
+  // 如果一行中有 ）* 但没有 *（，在该行对话文本开头（> - 或 > + 之后）补 * 开启斜体。
+  if (!settings.mergeConsecutive && (text.includes('*（') || text.includes('）*'))) {
     const lines = text.split('\n');
     let modified = false;
     for (let i = 0; i < lines.length; i++) {
-      if (lines[i].includes('*（')) {
-        for (let j = i + 1; j < lines.length; j++) {
-          if (lines[j].includes('）*')) {
-            // 仅当 *（ 和 ）* 之间没有新的消息头（> - ![ 或 > + ![）时才修复，
-            // 避免跨消息配对导致 > - ![face] 被错误地去除前缀
-            let hasNewMsg = false;
-            for (let k = i + 1; k <= j; k++) {
-              if ((lines[k].startsWith('> - ') || lines[k].startsWith('> + ')) && lines[k].includes('![')) {
-                hasNewMsg = true;
-                break;
-              }
-            }
-            if (!hasNewMsg) {
-              for (let k = i + 1; k <= j; k++) {
-                if (lines[k].startsWith('> - ')) {
-                  lines[k] = '> ' + lines[k].slice(4);
-                  modified = true;
-                }
-              }
-            }
-            break;
-          }
+      const line = lines[i];
+      const hasOpen = line.includes('*（');
+      const hasClose = line.includes('）*');
+      if (hasOpen && !hasClose) {
+        // 有开启无闭合：行末补 *
+        lines[i] = line + '*';
+        modified = true;
+      } else if (hasClose && !hasOpen) {
+        // 有闭合无开启：在对话文本开头补 *（在 > - 或 > + 或 > 之后）
+        const m = line.match(/^(> [-+ ] )/);
+        if (m) {
+          lines[i] = m[1] + '*' + line.slice(m[1].length);
+          modified = true;
         }
       }
     }
