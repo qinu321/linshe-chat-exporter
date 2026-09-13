@@ -5306,11 +5306,11 @@ function fallbackCopyText(text) {
 /**
  * Build markdown blockquote format:
  *
- * > + ![face](user_avatar) *我* 用户发言
- * > - ![face](char_avatar) *角色名* 角色发言
+ * > + ![face](user_avatar) `我` 用户发言
+ * > - ![face](char_avatar) `角色名` 角色发言
  * > 角色连续发言
- * > + ![face](user_avatar) *我* 用户又发言
- * > - ![face](char_avatar) *角色名* 角色又发言
+ * > + ![face](user_avatar) `我` 用户又发言
+ * > - ![face](char_avatar) `角色名` 角色又发言
  * > 继续
  *
  * 所有角色统一使用 前置 + {头像文件名} 作为 face 链接。
@@ -5472,44 +5472,20 @@ function buildMarkdownFormat(msgs, opts) {
 
     if (isUser) {
       // User: always show full header
-      lines.push(`> + ![face](${avatarUrl}) *${speaker}* ${content}`);
+      lines.push(`> + ![face](${avatarUrl}) \`${speaker}\` ${content}`);
       prevRole = 'user';
       prevSpeaker = 'user';
     } else {
       // Character/Assistant: use own avatar file name
       if (prevRole === 'user' || prevSpeaker !== speaker) {
         // First line of this character's block
-        lines.push(`> - ![face](${avatarUrl}) *${speaker}* ${content}`);
+        lines.push(`> - ![face](${avatarUrl}) \`${speaker}\` ${content}`);
       } else if (settings.mergeConsecutive) {
         // Same character continuing (merge)
         if (content.trim()) lines.push(`> ${content}`);
       } else {
         // Same character continuing (no merge)
         let line = `> - ${content}`;
-	      // 不合并模式下，若该行触发了“把 ( 或 （ 替换成 *（”的规则（含 *（ 且不含角色名），
-	      // 且第一个 *（ 前面没有别的 *（避免破坏粗体等星号上下文）：
-	      //  - 行首为“> - *（”→ 去掉列表符 -，变成“> *（”
-	      //  - 否则把第一个“ *（”拆到新的引用行（\n> *（）
-        if (content.includes('*（')) {
-          const firstStarIdx = line.indexOf('*（');
-          const starBefore = firstStarIdx > 0 && line.slice(0, firstStarIdx).includes('*');
-          if (!starBefore) {
-            if (line.includes('> - *（')) {
-              line = line.replace('> - *（', '> *（');
-            } else {
-              let idx = line.indexOf(' *（');
-              if (idx !== -1) {
-                // idx 指向空格，“*（”从 idx+1 起，删除 空格+*（ 共 3 个字符
-                line = line.slice(0, idx) + '\n> *（' + line.slice(idx + 3);
-              } else {
-                idx = line.indexOf('*（');
-                if (idx !== -1) {
-                  line = line.slice(0, idx) + '\n> *（' + line.slice(idx + 2);
-                }
-              }
-            }
-          }
-        }
         if (line.trim() !== '>' && line.trim() !== '> -') lines.push(line);
         }
         // 角色/图片→时间分割线→角色 时，为下一条角色发言补充 face 链接
@@ -5517,14 +5493,11 @@ function buildMarkdownFormat(msgs, opts) {
           const lastLine = lines[lines.length - 1];
           let applied = false;
           if (lastLine.startsWith('> - ') && !lastLine.includes('![')) {
-            lines[lines.length - 1] = `> - ![face](${tdFixNextRole.avatarUrl}) *${tdFixNextRole.speaker}* ${lastLine.slice(4)}`;
-            applied = true;
-          } else if (lastLine.startsWith('> *（') && !lastLine.includes('![')) {
-            lines[lines.length - 1] = `> - ![face](${tdFixNextRole.avatarUrl}) *${tdFixNextRole.speaker}* ${lastLine.slice(2)}`;
+            lines[lines.length - 1] = `> - ![face](${tdFixNextRole.avatarUrl}) \`${tdFixNextRole.speaker}\` ${lastLine.slice(4)}`;
             applied = true;
           } else if (lastLine.startsWith('> ') && !lastLine.startsWith('> -') && !lastLine.startsWith('> +') && !lastLine.includes('![') && !lastLine.startsWith('> \n')) {
             // 合并模式（mergeConsecutive=true）下，连续同角色不带头像，但时间分割线后应补充
-            lines[lines.length - 1] = `> - ![face](${tdFixNextRole.avatarUrl}) *${tdFixNextRole.speaker}* ${lastLine.slice(2)}`;
+            lines[lines.length - 1] = `> - ![face](${tdFixNextRole.avatarUrl}) \`${tdFixNextRole.speaker}\` ${lastLine.slice(2)}`;
             applied = true;
           }
           if (applied) tdFixNextRole = null;
@@ -5552,7 +5525,7 @@ function buildMarkdownFormat(msgs, opts) {
   let text = lines.join('\n');
   const firstLine = lines[0] || '';
   const STYLE_MAP = { '': '', bbs: 'bbs', pop: 'pop', wechat: 'wechat', qqchat: 'qqchat', linshe: 'linshe', baker: 'baker' };
-  let headerType = STYLE_MAP[settings.chatboxStyle] !== undefined ? STYLE_MAP[settings.chatboxStyle] : 'qqchat';
+  let headerType = STYLE_MAP[settings.chatboxStyle] !== undefined ? STYLE_MAP[settings.chatboxStyle] : 'linshe';
   // 私聊时，"邻舍"样式用 linshe-noname、"Baker"样式用 baker-noname（群聊保持原样式不变）
   if (state.currentType === 'private') {
     if (headerType === 'linshe') headerType = 'linshe-noname';
@@ -5574,11 +5547,10 @@ function buildMarkdownFormat(msgs, opts) {
     const headerTitle = (opts.chatTitle || settings.chatTitle || '邻舍聊天记录').replace(/\{\{content\}\}/g, 'content');
     let header = headerType
       ? `> [!chatbox|${headerType}]+ ${headerTitle}`
-      : `> [!chatbox|]+ ${headerTitle}`;
-    // 选中"普通"时：> [!chatbox|]+ → > [!chatbox]+ ；> [!chatbox|-swap]+ → > [!chatbox|swap]+
+      : `> [!chatbox]+ ${headerTitle}`;
+    // 选中"普通"时：> [!chatbox|-swap]+ → > [!chatbox|swap]+
     header = header
-      .replace('> [!chatbox|-swap]+', '> [!chatbox|swap]+')
-      .replace('> [!chatbox|]+', '> [!chatbox]+');
+      .replace('> [!chatbox|-swap]+', '> [!chatbox|swap]+');
     text = header + '\n> \n> ' + dt.date + ' ' + dt.time + '\n' + text;
   }
 
