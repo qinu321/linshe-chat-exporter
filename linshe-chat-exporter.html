@@ -2315,29 +2315,48 @@ async function fileExists(dirHandle, fileName) {
     return false;
   }
 }
+// 一次性读取目录所有文件名（返回 Map<文件名, 文件大小>），避免批量导出时重复遍历目录
+async function readDirFileMap(dirHandle) {
+  const map = new Map();
+  try {
+    for await (const entry of dirHandle.values()) {
+      if (entry.kind === 'file') {
+        try {
+          const f = await entry.getFile();
+          map.set(entry.name, f.size);
+        } catch (e) {
+          map.set(entry.name, -1); // 无法读取大小时标记为 -1
+        }
+      }
+    }
+  } catch (e) {}
+  return map;
+}
 // 生成不冲突的文件名：在扩展名前加 " (n)"，如 a.md → "a (1).md"（已存在则继续递增）
-async function getUniqueFileName(dirHandle, fileName) {
+// 可选的 existingNames Set 避免重复遍历目录
+async function getUniqueFileName(dirHandle, fileName, existingNames) {
   const dot = fileName.lastIndexOf('.');
   const stem = dot > 0 ? fileName.slice(0, dot) : fileName;
   const ext = dot > 0 ? fileName.slice(dot) : '';
-  // 一次性读取目录所有文件名，避免逐次 fileExists 异步 IO
-  const existingNames = new Set();
-  try {
-    for await (const entry of dirHandle.values()) {
-      existingNames.add(entry.name);
-    }
-  } catch (e) {}
-  if (!existingNames.has(fileName)) return fileName;
+  // 如果外部传入了已有文件名集合，直接复用，不重新遍历目录
+  const names = existingNames || (await (async () => {
+    const s = new Set();
+    try {
+      for await (const entry of dirHandle.values()) {
+        s.add(entry.name);
+      }
+    } catch (e) {}
+    return s;
+  })());
+  if (!names.has(fileName)) return fileName;
   let n = 1;
   let candidate = `${stem} (${n})${ext}`;
-  // 上限 1000 次，避免同名文件极多时无限循环
-  while (existingNames.has(candidate)) {
+  while (names.has(candidate)) {
     n++;
     if (n > 1000) {
-      // 重名过多：改用时间戳命名，保证总能写成功
       const ts = Date.now().toString(36);
       candidate = `${stem}_${ts}${ext}`;
-      if (!existingNames.has(candidate)) break;
+      if (!names.has(candidate)) break;
       return `${stem}_${ts}_${Math.random().toString(36).slice(2, 8)}${ext}`;
     }
     candidate = `${stem} (${n})${ext}`;
@@ -2357,19 +2376,27 @@ async function writeMdFileUnique(dirHandle, fileName, content) {
 //  同名同大小 → 跳过，不重复导出（返回 skipped）
 //  同名但大小不同 → 在文件名后加序号重命名后导出，不覆盖（返回 written + 新文件名）
 //  不存在 → 正常导出
-async function writeMdFileDedupeSize(dirHandle, fileName, content) {
+async function writeMdFileDedupeSize(dirHandle, fileName, content, fileCache) {
   const blob = new Blob([content], { type: 'text/plain;charset=utf-8' });
-  // 直接 try getFileHandle 替代 fileExists + getFileHandle 两次调用
-  //（网络映射盘下每次 1 次网络往返，合并可减少一次冗余等待）
-  let fh = null;
-  try { fh = await dirHandle.getFileHandle(fileName, { create: false }); } catch (e) {}
-  if (fh) {
-    const existing = await fh.getFile();
-    if (existing.size === blob.size) {
+  const contentSize = blob.size;
+  // 优先使用缓存的文件列表（Map<文件名, 大小>），避免每次异步 I/O
+  if (fileCache && fileCache.has(fileName)) {
+    if (fileCache.get(fileName) === contentSize) {
       return { status: 'skipped', fileName }; // 同名同大小 → 跳过
     }
     // 同名但大小不同 → 加序号重命名导出，不覆盖
-    fileName = await getUniqueFileName(dirHandle, fileName);
+    fileName = await getUniqueFileName(dirHandle, fileName, new Set(fileCache.keys()));
+  } else {
+    // 无缓存：直接 try getFileHandle 替代 fileExists + getFileHandle 两次调用
+    let fh = null;
+    try { fh = await dirHandle.getFileHandle(fileName, { create: false }); } catch (e) {}
+    if (fh) {
+      const existing = await fh.getFile();
+      if (existing.size === contentSize) {
+        return { status: 'skipped', fileName };
+      }
+      fileName = await getUniqueFileName(dirHandle, fileName);
+    }
   }
   await writeFileToDir(dirHandle, fileName, content);
   return { status: 'written', fileName };
@@ -2639,10 +2666,12 @@ async function exportAllMdCore() {
   let prevActualName = ''; // 上一个 md 实际写入的文件名（不含 .md 后缀），第一个文件为空
   let exportedCount = 0, skippedCount = 0;
   const seenZipNames = new Set(); // ZIP 包全局去重，跨批次同名文件只保留第一个
+  // 目录文件缓存：Map<dirHandle, Map<文件名, 大小>>，避免批量导出中重复遍历目录
+  const mdDirListingCache = new Map();
   for (let i = 0; i < batches.length; i++) {
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
-        const res = await doExportOneMd(batches[i], forceAllImages, currentMdDir, prevActualName);
+        const res = await doExportOneMd(batches[i], forceAllImages, currentMdDir, prevActualName, mdDirListingCache);
         prevActualName = res.writtenName;
         if (res.skipped) skippedCount++; else exportedCount++;
         // ZIP 模式：收集 md 内容
@@ -3087,7 +3116,7 @@ function binarySplitBatch(entry, forceAllImages, maxBytes) {
 
 // 批量导出单个 md 文件（一个日期组的子批）。文件名时间 = 该子批第一条消息的创建时间
 //（无效日期消息用该日期 12:00 兜底）；同名文件已存在时重命名加序号，不覆盖不跳过
-async function doExportOneMd(batch, forceAllImages, mdDirHandle, prevFileName) {
+async function doExportOneMd(batch, forceAllImages, mdDirHandle, prevFileName, fileCache) {
   const { day, msgs } = batch;
   const t = firstValidMsgTime(msgs) || new Date(day + 'T12:00:00');
   const ctx = getExportCtx(t, prevFileName);
@@ -3100,8 +3129,17 @@ async function doExportOneMd(batch, forceAllImages, mdDirHandle, prevFileName) {
     let mdSubDir = mdDirHandle;
     const subPath = resolveSubFolderPath(settings.mdSubFolder, ctx);
     if (subPath) mdSubDir = await getOrCreateSubDir(mdDirHandle, subPath);
+    // 从全局缓存中获取该子目录的文件列表缓存，避免重复遍历目录
+    let subDirCache = null;
+    if (fileCache) {
+      subDirCache = fileCache.get(mdSubDir);
+      if (!subDirCache) {
+        subDirCache = await readDirFileMap(mdSubDir);
+        fileCache.set(mdSubDir, subDirCache);
+      }
+    }
     // 同名同大小跳过（去重）、同名不同大小加序号重命名导出
-    const res = await writeMdFileDedupeSize(mdSubDir, fileName, content);
+    const res = await writeMdFileDedupeSize(mdSubDir, fileName, content, subDirCache);
     writtenName = res.fileName.replace(/\.md$/, '');
     skipped = res.status === 'skipped';
   }
@@ -3180,7 +3218,7 @@ async function downloadImagesBatched(imgs, folderRel, batchSize = 5) {
 //  同名同大小 → 跳过，不重复导出；同名但大小不同 → 在文件名后加序号重命名后导出，不覆盖。
 // 每批内并发 fetch（网络慢操作），写入阶段串行，避免"检查-写入"竞态导致同名文件互相覆盖
 // 返回 { downloaded, skipped } 统计
-async function downloadImagesToDir(imgs, dirHandle, batchSize = 5) {
+async function downloadImagesToDir(imgs, dirHandle, batchSize = 10) {
   if (!imgs || imgs.length === 0 || !dirHandle) return { downloaded: 0, skipped: 0 };
   let downloaded = 0, skipped = 0, failed = 0;
   for (let i = 0; i < imgs.length; i += batchSize) {
@@ -3204,61 +3242,58 @@ async function downloadImagesToDir(imgs, dirHandle, batchSize = 5) {
         continue;
       }
       let finalName = filename;
-      while (usedNames.has(finalName)) {
-        finalName = await getUniqueFileName(dirHandle, finalName);
+      // 批内同名冲突（同 URL 在同批中出现两次）直接内存中加序号，无需遍历目录
+      if (usedNames.has(finalName)) {
+        const dot = finalName.lastIndexOf('.');
+        const stem = dot > 0 ? finalName.slice(0, dot) : finalName;
+        const ext = dot > 0 ? finalName.slice(dot) : '';
+        let n = 1;
+        do {
+          finalName = `${stem} (${n})${ext}`;
+          n++;
+        } while (usedNames.has(finalName));
       }
       usedNames.add(finalName);
       toFetch.push({ img, filename: finalName });
     }
-    // Stage 2: 只 fetch 本地不存在的图片（网络慢操作）
-    const batchInterruptIds = [];
-    const fetched = await Promise.all(toFetch.map(async ({ img, filename }) => {
-      // 如果已中断，不再继续 fetch（避免后续图片的 Promise.all 仍会运行）
-      if (state.interruptExport) return { img, filename, blob: null };
+    // Stage 2+3: 流水线 fetch + write — 每张图 fetch 完立刻写入，不等整批全部完成。
+    // 避免单张慢图（5s 超时）拖慢整批，也不再有 Promise.all 的空等开销。
+    const fetchWritePromises = toFetch.map(async ({ img, filename }) => {
+      if (state.interruptExport) return;
       const ctrl = new AbortController();
       const t = setTimeout(() => ctrl.abort(), 5000);
       try {
         const res = await fetch(img.url, { signal: ctrl.signal });
+        clearTimeout(t);
         if (!res.ok) throw new Error(res.status);
         const blob = await res.blob();
-        // 检查图片大小限制（imgMaxKB > 0 时，超出限制则中断导出）
         const imgMaxKB = settings.imgMaxKB || 0;
         if (imgMaxKB > 0 && blob.size > imgMaxKB * 1024) {
           state.interruptExport = true;
           state.interruptReason = 'imgSize';
-          batchInterruptIds.push(img.msgId || 0);
-          return { img, filename, blob: null };
+          if (!state.interruptMsgId || img.msgId < state.interruptMsgId) {
+            state.interruptMsgId = img.msgId || 0;
+          }
+          return;
         }
-        return { img, filename, blob };
+        // fetch 完成，立即写入
+        const fh = await dirHandle.getFileHandle(filename, { create: true });
+        const w = await fh.createWritable();
+        await w.write(blob);
+        await w.close();
+        downloaded++;
       } catch (e) {
-        return { img, filename, blob: null };
+        if (!state.interruptExport) {
+          const ok = await downloadOneImage(img, null);
+          if (!ok) failed++;
+        }
       } finally {
         clearTimeout(t);
       }
-    }));
-    // 同批次中取最早（最小 msgId）的图片作为中断定位依据
-    if (batchInterruptIds.length > 0) {
-      state.interruptMsgId = Math.min(...batchInterruptIds);
-    }
-    // Stage 3: 串行写入（文件必然不存在，无需再次去重检查）
-    for (const { img, filename, blob } of fetched) {
-      if (!blob) {
-        // 因图片过大限制而不导出时，不触发浏览器默认下载
-        if (state.interruptExport && state.interruptReason === 'imgSize') continue;
-        const ok = await downloadOneImage(img, null);
-        if (!ok) failed++;
-        continue;
-      }
-      const fh = await dirHandle.getFileHandle(filename, { create: true });
-      const w = await fh.createWritable();
-      await w.write(blob);
-      await w.close();
-      downloaded++;
-    }
-    // 批次间喘息：仅当有实际网络下载时等待，避免重导出时不必要的延迟
-    if (i + batchSize < imgs.length && fetched.length > 0) {
-      await new Promise(r => setTimeout(r, 300));
-    }
+    });
+    await Promise.all(fetchWritePromises);
+    // 批次间不再强制喘息——File System Access API 写入有内部排队，不会压垮浏览器
+    // 取消旧的 300ms 间隔，避免大量图片时累积数秒空等
     // 中断导出：立即跳出外层循环，不再处理后续批次
     if (state.interruptExport) break;
   }
@@ -3347,7 +3382,7 @@ function downloadZipBlob(blob, zipName) {
 // 统一批次化图片 fetch 到 ZIP entries（每批 5 张，批次间 300ms 喘息）
 // 检查 state.interruptExport 和 settings.imgMaxKB，支持中断
 // 返回失败张数
-async function _batchFetchImagesToZip(imgs, zipEntries, batchSize = 5, seenNames) {
+async function _batchFetchImagesToZip(imgs, zipEntries, batchSize = 10, seenNames) {
   if (!imgs || imgs.length === 0 || !zipEntries) return 0;
   // 按文件名去重：同一文件名只保留第一个，避免 ZIP 中重复条目
   // 使用外部传入的 seenNames 以实现跨批次去重；未传入则创建新 Set
