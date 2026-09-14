@@ -19,7 +19,7 @@ Download the zip package from Releases and unzip it:
 
 2. - Place `linshe-chat-exporter.html` somewhere convenient and fixed. Open it with Chrome/Edge, bookmark it, and use the bookmark next time.
 
-   - Or use the [online link]() directly — whichever you prefer.
+   - Or use the [online link](https://qinu321.github.io/linshe-chat-exporter/) directly — whichever you prefer.
 
 
 ## Privacy & Security
@@ -38,7 +38,7 @@ This tool never needs an internet connection — it only talks to your local Lin
 
 Make sure LinShe is running, then open `linshe-chat-exporter.html` with Chrome/Edge.
 
-Or use the [online link]().
+Or use the [online link](https://qinu321.github.io/linshe-chat-exporter/).
 
 Once connected, your private chat contacts will appear in the sidebar.
 

@@ -19,7 +19,7 @@
 
 2. - 把`linshe-chat-exporter.html`放在你想放的任意固定的位置，用Chrome/Edge浏览器打开它，将它收藏进书签，下次想用直接打开书签就行。
 
-   - 也能直接使用本仓库的导出器[线上链接]()，随你喜好~
+   - 也能直接使用本仓库的导出器[线上链接](https://qinu321.github.io/linshe-chat-exporter/)，随你喜好~
 
 
 ## 关于聊天记录隐私的安全性
@@ -38,7 +38,7 @@
 
 先确保开启了邻舍，然后用Chrome/Edge浏览器打开`linshe-chat-exporter.html`
 
-或者[在线链接]()
+或者[在线链接](https://qinu321.github.io/linshe-chat-exporter/)
 
 正常连接上邻舍的话，侧边栏会显示你的私聊角色们
 
