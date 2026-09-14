@@ -1,0 +1,37 @@
+name: Package Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Create zip package
+        run: |
+          zip -r linshe-chat-exporter.zip \
+            chatbox.css \
+            linshe-chat-exporter.html \
+            README.md \
+            README_EN.md \
+            LICENSE.md
+
+      - name: Get commit message
+        id: commit_msg
+        run: |
+          echo "body<<EOF" >> $GITHUB_OUTPUT
+          git log -1 --pretty=format:"%s%n%n%b" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: linshe-chat-exporter.zip
+          name: Linshe Chat Exporter ${{ github.ref_name }}
+          body: ${{ steps.commit_msg.outputs.body }}
