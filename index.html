@@ -2198,17 +2198,27 @@ async function chooseExportDir(which) {
     showToast(t('t.noDirPicker'), 'error');
     return;
   }
-  try {
-    const handle = await window.showDirectoryPicker({ mode: 'readwrite' });
-    if (which === 'md') mdExportDirHandle = handle;
-    else if (which === 'img') imgExportDirHandle = handle;
-    else if (which === 'emoji') emojiExportDirHandle = handle;
-    else if (which === 'avatar') avatarExportDirHandle = handle;
-    try { await idbSet(which + 'ExportDir', handle); } catch (e) {}
-    updateExportDirLabels();
-    showToast(t('t.folderSelected', {which: which, name: handle.name}), 'success');
-  } catch (e) {
-    if (e.name !== 'AbortError') showToast(t('t.folderSelectFailed', {msg: e.message}), 'error');
+  // Chrome 的 transient activation 可能让首次 showDirectoryPicker 静默失败，
+  // 重试一次可解决（用户再点一次即提供新手势）
+  for (let attempt = 0; attempt < 2; attempt++) {
+    try {
+      const handle = await window.showDirectoryPicker({ mode: 'readwrite' });
+      if (which === 'md') mdExportDirHandle = handle;
+      else if (which === 'img') imgExportDirHandle = handle;
+      else if (which === 'emoji') emojiExportDirHandle = handle;
+      else if (which === 'avatar') avatarExportDirHandle = handle;
+      try { await idbSet(which + 'ExportDir', handle); } catch (e) {}
+      updateExportDirLabels();
+      showToast(t('t.folderSelected', {which: which, name: handle.name}), 'success');
+      return;
+    } catch (e) {
+      if (e.name !== 'AbortError') {
+        showToast(t('t.folderSelectFailed', {msg: e.message}), 'error');
+        return;
+      }
+      // AbortError：手势过期或用户取消——首次静默重试，第二次才放弃
+      if (attempt === 1) return;
+    }
   }
 }
 // 确保取得导出文件夹句柄：已设置直接返回；未设置时弹窗选择（弹窗前提示文本）；
