@@ -985,7 +985,7 @@ body {
       <button class="btn btn-danger" id="clearBtn" onclick="clearSelection()" disabled data-i18n="b.clear">✕ 清除</button>
       <span class="export-from-group">
       <span class="export-from-label" data-i18n-title="tt.exportFromLabel" data-i18n="ui.exportFromLabel" onclick="jumpToExportId()" style="cursor:pointer">已导出到 ID:</span>
-      <input type="text" id="exportFromIdInput" class="export-from-input" inputmode="numeric" pattern="[0-9]*" value="0" autocomplete="off" oninput="onExportFromIdInput()" onchange="onExportFromIdChange()">
+      <input type="text" id="exportFromIdInput" class="export-from-input" inputmode="numeric" pattern="[0-9]*" value="0" autocomplete="off" oninput="onExportFromIdInput()" onchange="onExportFromIdChange()" onkeydown="if(event.key==='Enter')jumpToExportId()">
       <button class="btn" id="exportAllBtn" onclick="exportAllMd()" data-i18n="b.batchExport" data-i18n-title="ui.exportAllTitle">🗂 范围批量导出md</button>
       <label style="display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--text-sub);cursor:pointer;white-space:nowrap">
         <input type="checkbox" id="exportImagesOnlyCb" style="accent-color:var(--accent);margin:0;width:14px;height:14px">
@@ -1407,14 +1407,30 @@ function jumpToExportId() {
   state.isSearching = false;
   const searchInput = searchBar ? searchBar.querySelector('input') : null;
   if (searchInput) searchInput.value = '';
-  // 使用与 jumpToContext 一致的跳转方法：在完整消息列表中查找，切换页面，居中定位
-  const idx = state.currentMessages.findIndex(m => m.id === id);
+  // 在完整消息列表中查找精确 ID
+  let idx = state.currentMessages.findIndex(m => m.id === id);
+  let targetId = id;
   if (idx === -1) {
-    showToast(t('t.idNotFound'), 'info');
-    return;
+    // 精确 ID 不存在，找最近的消息 ID
+    const msgs = state.currentMessages;
+    if (msgs.length === 0) {
+      showToast(t('t.idNotFound'), 'info');
+      return;
+    }
+    let nearest = msgs[0];
+    let minDiff = Math.abs(nearest.id - id);
+    for (let i = 1; i < msgs.length; i++) {
+      const diff = Math.abs(msgs[i].id - id);
+      if (diff < minDiff) { minDiff = diff; nearest = msgs[i]; }
+    }
+    targetId = nearest.id;
+    idx = msgs.indexOf(nearest);
+    // 更新输入框和游标为实际跳转的 ID
+    input.value = String(targetId);
+    setExportCursor(targetId);
   }
   const page = Math.floor(idx / state.pageSize) + 1;
-  state.jumpTargetId = id;
+  state.jumpTargetId = targetId;
   state.selectedIds = new Set();
   state.selectedImgKeys = new Set();
   state.selectedTimeDividerKeys = new Set();
@@ -1430,8 +1446,8 @@ function jumpToExportId() {
   lastScrollTop = 0;
   autoPageCooldown = Date.now();
   suppressAutoPageUntil = Date.now() + 1500;
-  scrollToCenterMessage(id);
-  showToast(t('t.jumpToId', { id, page }), 'info');
+  scrollToCenterMessage(targetId);
+  showToast(t('t.jumpToId', { id: targetId, page }), 'info');
 }
 // 公共：滚动到消息 ID 所在位置并居中（使用 requestAnimationFrame 链校准）
 // 替代两处重复的 centerCalibrate 内联函数
@@ -3976,6 +3992,21 @@ function getFilteredMessages() {
     } else if (hasOr && orTokens.some(k => matchToken(k, m))) {
       result.push(m);
       seen.add(m.id);
+    }
+  }
+  // ID 近似匹配：搜索纯数字且无精确结果时，显示最近的前后两条消息
+  if (result.length === 0 && andTokens.length > 0) {
+    const numToken = andTokens.find(k => /^\d+$/.test(k));
+    if (numToken) {
+      const num = parseInt(numToken, 10);
+      const msgs = state.currentMessages;
+      let before = null, after = null;
+      for (const m of msgs) {
+        if (m.id < num && (before === null || m.id > before.id)) before = m;
+        if (m.id > num && (after === null || m.id < after.id)) after = m;
+      }
+      if (before) result.push(before);
+      if (after) result.push(after);
     }
   }
   return result;
