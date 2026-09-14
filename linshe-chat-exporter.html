@@ -767,7 +767,7 @@ body {
         <div class="setting-row">
           <label data-i18n="l.linsheUrl">邻舍网址：</label>
           <input type="text" id="setLinsheUrl" oninput="onSettingChange()">
-          <button type="button" class="btn" onclick="reconnect()" title="按当前设置的网址重新连接并刷新角色/群聊列表" data-i18n="b.reconnect">🔄 重新连接</button>
+          <button type="button" class="btn" onclick="reconnect()" data-i18n-title="tt.reconnect" data-i18n="b.reconnect">🔄 重新连接</button>
           <div class="setting-note" data-i18n="n.linsheUrl">此处的值直接更改 API 网址（默认：http://localhost:3099）。修改后点击"重新连接"立即生效，无需刷新页面</div>
         </div>
         <div class="setting-row">
@@ -984,7 +984,7 @@ body {
       <button class="btn" id="exportMdBtn" onclick="exportSelectedMd()" disabled data-i18n="b.exportMd">📄 导出md</button>
       <button class="btn btn-danger" id="clearBtn" onclick="clearSelection()" disabled data-i18n="b.clear">✕ 清除</button>
       <span class="export-from-group">
-      <span class="export-from-label" title="范围批量导出从该 ID 之后的第一条消息开始" data-i18n="ui.exportFromLabel" onclick="jumpToExportId()" style="cursor:pointer">已导出到 ID:</span>
+      <span class="export-from-label" data-i18n-title="tt.exportFromLabel" data-i18n="ui.exportFromLabel" onclick="jumpToExportId()" style="cursor:pointer">已导出到 ID:</span>
       <input type="text" id="exportFromIdInput" class="export-from-input" inputmode="numeric" pattern="[0-9]*" value="0" autocomplete="off" oninput="onExportFromIdInput()" onchange="onExportFromIdChange()">
       <button class="btn" id="exportAllBtn" onclick="exportAllMd()" data-i18n="b.batchExport" data-i18n-title="ui.exportAllTitle">🗂 范围批量导出md</button>
       <label style="display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--text-sub);cursor:pointer;white-space:nowrap">
@@ -1018,12 +1018,12 @@ body {
 
     <!-- Pagination -->
     <div class="pagination-bar" id="paginationBar" style="display:none;">
-      <button class="page-btn" id="pageFirst" onclick="goPage(1)" title="首页">«</button>
-      <button class="page-btn" id="pagePrev" onclick="goPage(state.currentPage - 1)" title="上一页">‹</button>
+      <button class="page-btn" id="pageFirst" onclick="goPage(1)" data-i18n-title="tt.pageFirst" title="首页">«</button>
+      <button class="page-btn" id="pagePrev" onclick="goPage(state.currentPage - 1)" data-i18n-title="tt.pagePrev" title="上一页">‹</button>
       <div class="page-nums" id="pageNums"></div>
       <span class="page-info" id="pageInfo"></span>
-      <button class="page-btn" id="pageNext" onclick="goPage(state.currentPage + 1)" title="下一页">›</button>
-      <button class="page-btn" id="pageLast" onclick="goPage(state.totalPages)" title="末页">»</button>
+      <button class="page-btn" id="pageNext" onclick="goPage(state.currentPage + 1)" data-i18n-title="tt.pageNext" title="下一页">›</button>
+      <button class="page-btn" id="pageLast" onclick="goPage(state.totalPages)" data-i18n-title="tt.pageLast" title="末页">»</button>
       <div class="page-jump">
         <span style="font-size:12px;color:#94a3b8;" data-i18n="ui.pageJump">跳转</span>
         <input type="number" id="pageJumpInput" min="1" onkeydown="if(event.key==='Enter')jumpToPage()">
@@ -1062,7 +1062,6 @@ title: {{mdFileName}}
 time: {{date}} {{time}}
 tags:
   - {{role}}
-  - {{title}}
 ---
 
 # {{title}}
@@ -1110,12 +1109,12 @@ const I18N = {
     'n.theme':'浅色为默认配色；深色为深色整体配色；跟随系统则自动匹配操作系统的深浅色设置','n.linsheUrl':'此处的值直接更改 API 网址（默认：http://localhost:3099）。修改后点击"重新连接"立即生效，无需刷新页面','n.userName':'此处的值直接更改用户显示名称（默认："我"）','n.facePrefix':'这个链接 + 角色头像图片文件名 = 复制文本中的头像链接，留空时仅使用头像文件名（带后缀）。例如填写 http://192.168.31.24:37777/Notepic/Icon/ 后，用户的头像链接即为 http://192.168.31.24:37777/Notepic/Icon/user_avatar.png','n.imgPrefix':'作用跟头像外链前置一致，留空时仅使用图片文件名（不含后缀）+ 下方选择的后缀。','n.imgExt':'此处的值直接更改复制时聊天记录图片链接的后缀名及图片保存时的后缀名','n.chatboxStyle':'推荐圆形头像框的后三个样式','n.chatTitle':'默认为"角色名/群聊名"，支持与 md 文件名相同的变量（如 {{role}}、{{YYYY}}{{MM}}{{DD}} 等），渲染时替换','n.mdTemplate':'模板变量：{{mdFileName}} md文件名(不含.md) · {{title}} 聊天框标题 · {{date}} 日期(YYYY-MM-DD) · {{time}} 时间(HH:mm) · {{role}} 当前对话名（私聊为角色名、群聊为群聊名）· {{previousFileName}} 上一个md文件名(不含.md，批量导出时有效，第一个或单独导出为空) · {{content}} 聊天记录正文（复制格式）','n.mdFileNamePrivate':'变量按钮点击后插入到光标位置（无光标时加到末尾），{{YYYY}}{{MM}}{{DD}} 为聊天记录日期、{{hh}}{{mm}}{{ss}} 为记录时间（批量导出时取该文件第一条消息的时间），文件名最长 260 字符','n.mdFileNameGroup':'变量按钮点击后插入到光标位置（无光标时加到末尾），{{YYYY}}{{MM}}{{DD}} 为聊天记录日期、{{hh}}{{mm}}{{ss}} 为记录时间（批量导出时取该文件第一条消息的时间），文件名最长 260 字符','n.mdDirectObsidian':'选择"是"时，"导出md"按钮将通过 obsidian://new 在 Obsidian 仓库中创建文件（需已安装并打开过 Obsidian）；"范围批量导出md"始终按下方"md导出文件夹"设置导出到本地文件夹（Obsidian URI 批量导出大概率会丢失文件）。选择"否"时，"导出md"按"md导出文件夹"设置导出','n.mdFolder':'仅当"md文件是否直接添加到Obsidian"为"是"时使用，为 Obsidian 仓库根目录下的路径，支持用 "/" 创建子文件夹，如 "日记/{{YYYY}}{{MM}}{{DD}}_linsheMD"','n.mdExportDir':'预先指定 md 文件的导出位置（Chrome/Edge 支持）。未设置时，导出过程中会弹出"选择md导出文件夹"提示并让您选择；不支持选择文件夹的环境自动下载到浏览器默认下载文件夹','n.mdSubFolder':'会在导出到设置的本地文件夹时自动创建子文件夹，方便分类','n.imgExportDir':'预先指定图片的导出位置（Chrome/Edge 支持）。未设置时，导出过程中会弹出"选择图片导出文件夹"提示并让您选择；不支持选择文件夹的环境自动下载到浏览器默认下载文件夹','n.emojiExportDir':'功能同上','n.imgSubFolder':'会在导出到设置的本地文件夹时自动创建子文件夹，方便分类','n.exportAvatars':'一次性导出所有角色和用户的头像到指定文件夹里；不支持环境下自动下载到浏览器默认下载文件夹','n.maxFileSize':'建议不要超过50KB，否则在Obsidian里打开会很卡',
     'b.reconnect':'🔄 重新连接','b.exportAvatars':'📷 导出头像','b.chooseMdDir':'📁 选择md导出文件夹','b.chooseImgDir':'📁 选择图片导出文件夹','b.chooseEmojiDir':'📁 选择表情包导出文件夹','b.newTemplate':'＋ 新建模板','b.exportTemplate':'📤 导出当前模板','b.importTemplate':'📥 导入当前模板','b.save':'💾 保存','b.reset':'↺ 重置','b.exportSettings':'📤 导出设置','b.importSettings':'📥 导入设置','b.copySelected':'📋 复制选中','b.exportMd':'📄 导出md','b.clear':'✕ 清除','b.batchExport':'🗂 范围批量导出md','b.go':'GO',
     'tab.private':'私聊','tab.group':'群聊',
-    'ui.searchPlaceholder':'搜索角色/群聊…','ui.msgSearchPlaceholder':'空格分隔搜索关键词（内容/ID/角色名/日期），+扩大 -排除','ui.selectAllPrefix':'已选中','ui.selectAllMsg':'条消息和','ui.selectAllImg':'张图片','ui.selectAllHint':'勾选两条不连续的对话能自动选取中间所有的对话选框','ui.exportFromLabel':'已导出到 ID:','ui.pageJump':'跳转','ui.exportOverlay':'正在导出，请稍候…','ui.chatTitlePlaceholder':'← 请从左侧选择一个对话','ui.selectChatHint':'请从左侧选择一个对话','ui.notSet':'未设置，导出时提示选择','ui.folderSelected':'已选择：','ui.subtitle':'查看 & 框选复制','ui.exportOverlayBatch':'正在批量导出 {count} 个 md 文件…','ui.pageTitle':'邻舍 · 聊天记录导出器','ui.headerTitle':'📋 邻舍 · 聊天记录导出器','ui.connected':'已连接','ui.checkingConnection':'检查连接…','ui.connectFailed':'连接失败','ui.selectImg':'选中此图片','ui.exportAllTitle':'按日期批量导出从文本框ID之后到末尾的聊天记录（0=导出全部）','ui.settingsPage':'设置页面',
+    'ui.searchPlaceholder':'搜索角色/群聊…','ui.msgSearchPlaceholder':'空格分隔搜索关键词（内容/ID/角色名/日期），+扩大 -排除','ui.selectAllPrefix':'已选中','ui.selectAllMsg':'条消息和','ui.selectAllImg':'张图片','ui.selectAllHint':'勾选两条不连续的对话能自动选取中间所有的对话选框','ui.exportFromLabel':'已导出到 ID:','ui.pageJump':'跳转','ui.exportOverlay':'正在导出，请稍候…','ui.chatTitlePlaceholder':'← 请从左侧选择一个对话','ui.selectChatHint':'请从左侧选择一个对话','ui.notSet':'未设置，导出时提示选择','ui.folderSelected':'已选择：','ui.subtitle':'查看 & 框选复制','ui.exportOverlayBatch':'正在批量导出 {count} 个 md 文件…','ui.pageTitle':'邻舍 · 聊天记录导出器','ui.headerTitle':'📋 邻舍 · 聊天记录导出器','ui.connected':'已连接','ui.checkingConnection':'检查连接…','ui.connectFailed':'连接失败','ui.selectImg':'选中此图片','ui.jumpContext':'上下文','ui.searchHintFound':'找到 {filtered} / {total} 条','ui.searchHintTotal':'{total} 条消息','ui.clearSearch':'✕ 清除搜索','ui.pageInfo':'第 <span class=\"highlight\">{page}</span>/{totalPages} 页 · 共 <span class=\"highlight\">{total}</span> 条','ui.exportAllTitle':'按日期批量导出从文本框ID之后到末尾的聊天记录（0=导出全部）','ui.settingsPage':'设置页面',
     'ui.noResults':'没有匹配的结果','ui.noData':'暂无数据','ui.noSearchResults':'没有匹配的消息','ui.tryOtherKeywords':'试试其他关键词','ui.noMessages':'暂无消息记录','ui.msgCount':'共 {count} 条','ui.filteredCount':'共 {total} 条 · 筛选出 {filtered} 条','ui.loadingMessages':'加载消息中…',
-    'tt.editTemplate':'编辑此模板','tt.exportTemplate':'导出此模板为 JSON','tt.importTemplate':'导入 JSON 到此模板','tt.deleteTemplate':'删除此模板',
+    'tt.editTemplate':'编辑此模板','tt.exportTemplate':'导出此模板为 JSON','tt.importTemplate':'导入 JSON 到此模板','tt.deleteTemplate':'删除此模板','tt.jumpContext':'跳转到原始聊天记录，查看上下文','tt.exportFromLabel':'范围批量导出从该 ID 之后的第一条消息开始','tt.reconnect':'按当前设置的网址重新连接并刷新角色/群聊列表','tt.pageFirst':'首页','tt.pagePrev':'上一页','tt.pageNext':'下一页','tt.pageLast':'末页','tt.setDefaultTemplate':'设为默认模板','tt.selectTimeDivider':'选择时间分割线',
     'tab.settings':'设置',
     'vb.年':'年','vb.月':'月','vb.日':'日','vb.时':'时','vb.分':'分','vb.秒':'秒','vb.角色名/群聊名':'角色名/群聊名','vb.标题':'标题','vb.md文件名':'md文件名','vb.日期':'日期','vb.时间':'时间','vb.日期时间':'日期时间','vb.上一个md文件名':'上一个md文件名','vb.聊天记录正文':'聊天记录正文',
-    't.exportDone':'✅ 批量导出完成，共 {count} 个文件','t.exportDoneSkipped':'✅ 批量导出完成：新增 {count} 个，跳过 {skipped} 个已存在','t.exportStart':'开始批量导出 {count} 个 md 文件…','t.noMessages':'当前没有可导出的对话记录','t.allExported':'已全部导出，不再重复','t.selectMdDir':'⚠️ 批量导出前请先选择"md导出文件夹"（可点击设置页中的"选择md导出文件夹"）','t.selectImgDir':'⚠️ 批量导出附带图片，请先选择"图片导出文件夹"，否则无法导出图片','t.imageFailed':'⚠️ {count} 张图片下载失败（网络超时或加载错误，已跳过）','t.settingsSaved':'✅ 设置已保存','t.settingsReset':'✅ 设置已重置为默认值','t.settingsExported':'✅ 设置已导出为 JSON 文件','t.settingsImported':'✅ 设置已从 JSON 文件导入','t.settingsImportFailed':'导入失败：不是有效的设置 JSON','t.operationInProgress':'⏳ 操作进行中，请稍候…','t.folderSelected':'✅ 已选择{which}导出文件夹：{name}','t.folderSelectFailed':'选择文件夹失败: {msg}','t.imageDirWarning':'⚠️ 图片将下载到浏览器默认下载文件夹；大量图片可能被浏览器拦截，建议先设置"图片导出文件夹"','t.exportOverlay':'正在批量导出 {count} 个 md 文件…','t.copyCount':'📋 复制选中 ({count})','t.exportFromTooBig':'已导出到 ID 不能大于最后一条消息的 ID','t.idNotFound':'未找到该 ID 的消息','t.templateExported':'✅ 模板已导出为 JSON','t.templateImported':'✅ 模板已导入','t.templateImportFailed':'❌ 模板导入失败：不是有效的 JSON','t.fileTooLong':'⚠️ 文件 {relPath} 内容过长（{size}MB），已改用本地导出','t.dirNotFound':'⚠️ {which}导出文件夹不存在，请重新选择','t.writeFailed':'⚠️ 文件夹写入失败，导出已停止','t.noDirPicker':'当前浏览器不支持选择文件夹（需 Chrome/Edge）','t.chooseDirPrompt':'请选择{which}导出文件夹','t.folderSelectFailFallback':'选择文件夹失败，改用默认下载文件夹','t.noSelectionExport':'请先勾选要导出的消息或图片','t.mdExported':'✅ md 文件已导出到文件夹：{name}','t.mdExportedRenamed':'✅ 已存在同名文件，已重命名导出：{name}','t.mdWriteFailed':'⚠️ 写入 md 导出文件夹失败','t.mdTooLongNoDir':'⚠️ 内容过长无法通过 Obsidian 创建，且未设置 md 导出文件夹。请先在设置中选择"md导出文件夹"后重试','t.obsidianSent':'✅ 已发送到 Obsidian 创建笔记','t.mdDownloadStarted':'✅ md 文件已开始导出（默认下载）','t.mdExportStarted':'✅ md 文件已开始导出','t.mdWriteFailed2':'md 文件写入失败：','t.noMdDirBatch':'⚠️ 未选择 md 导出文件夹，批量导出已停止','t.reconnecting':'🔄 正在重新连接…','t.connectFailCheck':'❌ 连接失败：请检查"邻舍地址"设置是否正确','t.reconnected':'✅ 已重新连接','t.loadCharsFail':'加载角色失败: ','t.loadGroupsFail':'加载群聊失败: ','t.loadMsgsFail':'加载消息失败: ','t.loadGroupMsgsFail':'加载群消息失败: ','t.busySwitch':'⚠️ 复制/导出/下载进行中，请稍候再切换','t.busySwitchChat':'⚠️ 复制/导出/下载进行中，请稍候再切换对话','t.avatarExportNoAvatars':'ℹ️ 没有可导出的头像','t.avatarExportStart':'📷 正在导出 {count} 个头像…','t.avatarExportDone':'✅ 已导出 {count} 个头像文件（跳过 {skipped} 个重复）','t.searchClears':'搜索将清空当前选择','t.pageRange':'页码应在 1~{total} 之间','t.ctxNotFound':'未找到该消息的上下文','t.pageJumped':'已跳转到原始记录第 {page} 页','t.noImgDir':'⚠️ 未设置图片导出文件夹，图片将下载到浏览器默认下载文件夹','t.noSelectionCopy':'请先勾选要复制的消息或图片','t.nothingSelected':'没有选中任何消息或图片','t.copied':'✅ 已复制 {count} 项','t.copyFailed':'复制失败，请手动复制','t.exportInterrupted':'⏹ 已中断导出，并未完成全部导出任务','t.exportInterruptedImgSize':'⚠️ 因图片过大已中断导出，请检查图片是否已全部压缩','t.exportInterruptedImgSize2':'⚠️ 仍然有图片未压缩，请检查图片是否已全部压缩','t.imgSizeSkipped':'部分图片因为过大而未能导出','t.exportImagesOnlyDone':'✅ 已导出 {count} 张图片','t.exportImagesDoneSkipped':'✅ 已导出 {count} 张图片，跳过了 {skipped} 张已存在图片','t.exportImagesAllSkipped':'ℹ️ 图片全部已存在，跳过导出','t.exportImgSizeLimitTooSmall':'⚠️ 图片限制下载过小，请修改设置！','t.noImagesToExport':'没有可导出的图片','l.imgMaxKB':'图片限制下载大小：','n.imgMaxKB':'当图片大小超过该值时，会立即中断下载，以防止下载到未压缩图片，值为0时不做限制','b.interruptExport':'⏹ 中断导出','ui.imagesOnly':'仅图片',
+    't.exportDone':'✅ 批量导出完成，共 {count} 个文件','t.exportDoneSkipped':'✅ 批量导出完成：新增 {count} 个，跳过 {skipped} 个已存在','t.exportStart':'开始批量导出 {count} 个 md 文件…','t.noMessages':'当前没有可导出的对话记录','t.allExported':'已全部导出，不再重复','t.selectMdDir':'⚠️ 批量导出前请先选择"md导出文件夹"（可点击设置页中的"选择md导出文件夹"）','t.selectImgDir':'⚠️ 批量导出附带图片，请先选择"图片导出文件夹"，否则无法导出图片','t.imageFailed':'⚠️ {count} 张图片下载失败（网络超时或加载错误，已跳过）','t.jumpToId':'已跳转到 ID: {id}（第 {page} 页）','t.mdZipDownloaded':'✅ md + 图片已打包为 ZIP 下载','t.zipDone':'✅ ZIP 打包完成，共 {count} 个文件','t.imgZipDone':'✅ 图片 ZIP 打包完成，共 {count} 张','t.settingsSaved':'✅ 设置已保存','t.settingsReset':'✅ 设置已重置为默认值','t.settingsExported':'✅ 设置已导出为 JSON 文件','t.settingsImported':'✅ 设置已从 JSON 文件导入','t.settingsImportFailed':'导入失败：不是有效的设置 JSON','t.operationInProgress':'⏳ 操作进行中，请稍候…','t.folderSelected':'✅ 已选择{which}导出文件夹：{name}','t.folderSelectFailed':'选择文件夹失败: {msg}','t.imageDirWarning':'⚠️ 图片将下载到浏览器默认下载文件夹；大量图片可能被浏览器拦截，建议先设置"图片导出文件夹"','t.exportOverlay':'正在批量导出 {count} 个 md 文件…','t.copyCount':'📋 复制选中 ({count})','t.exportFromTooBig':'已导出到 ID 不能大于最后一条消息的 ID','t.idNotFound':'未找到该 ID 的消息','t.templateExported':'✅ 模板已导出为 JSON','t.templateImported':'✅ 模板已导入','t.templateImportFailed':'❌ 模板导入失败：不是有效的 JSON','t.fileTooLong':'⚠️ 文件 {relPath} 内容过长（{size}MB），已改用本地导出','t.dirNotFound':'⚠️ {which}导出文件夹不存在，请重新选择','t.writeFailed':'⚠️ 文件夹写入失败，导出已停止','t.noDirPicker':'当前浏览器不支持选择文件夹（需 Chrome/Edge）','t.chooseDirPrompt':'请选择{which}导出文件夹','t.folderSelectFailFallback':'选择文件夹失败，改用默认下载文件夹','t.noSelectionExport':'请先勾选要导出的消息或图片','t.mdExported':'✅ md 文件已导出到文件夹：{name}','t.mdExportedRenamed':'✅ 已存在同名文件，已重命名导出：{name}','t.mdWriteFailed':'⚠️ 写入 md 导出文件夹失败','t.mdTooLongNoDir':'⚠️ 内容过长无法通过 Obsidian 创建，且未设置 md 导出文件夹。请先在设置中选择"md导出文件夹"后重试','t.obsidianSent':'✅ 已发送到 Obsidian 创建笔记','t.mdDownloadStarted':'✅ md 文件已开始导出（默认下载）','t.mdExportStarted':'✅ md 文件已开始导出','t.mdWriteFailed2':'md 文件写入失败：','t.noMdDirBatch':'⚠️ 未选择 md 导出文件夹，批量导出已停止','t.reconnecting':'🔄 正在重新连接…','t.connectFailCheck':'❌ 连接失败：请检查"邻舍地址"设置是否正确','t.reconnected':'✅ 已重新连接','t.loadCharsFail':'加载角色失败: ','t.loadGroupsFail':'加载群聊失败: ','t.loadMsgsFail':'加载消息失败: ','t.loadGroupMsgsFail':'加载群消息失败: ','t.busySwitch':'⚠️ 复制/导出/下载进行中，请稍候再切换','t.busySwitchChat':'⚠️ 复制/导出/下载进行中，请稍候再切换对话','t.avatarExportNoAvatars':'ℹ️ 没有可导出的头像','t.avatarExportStart':'📷 正在导出 {count} 个头像…','t.avatarExportDone':'✅ 已导出 {count} 个头像文件（跳过 {skipped} 个重复）','t.searchClears':'搜索将清空当前选择','t.pageRange':'页码应在 1~{total} 之间','t.ctxNotFound':'未找到该消息的上下文','t.pageJumped':'已跳转到原始记录第 {page} 页','t.noImgDir':'⚠️ 未设置图片导出文件夹，图片将下载到浏览器默认下载文件夹','t.noSelectionCopy':'请先勾选要复制的消息或图片','t.nothingSelected':'没有选中任何消息或图片','t.copied':'✅ 已复制 {count} 项','t.copyFailed':'复制失败，请手动复制','t.exportInterrupted':'⏹ 已中断导出，并未完成全部导出任务','t.exportInterruptedImgSize':'⚠️ 因图片过大已中断导出，请检查图片是否已全部压缩','t.exportInterruptedImgSize2':'⚠️ 仍然有图片未压缩，请检查图片是否已全部压缩','t.imgSizeSkipped':'部分图片因为过大而未能导出','t.exportImagesOnlyDone':'✅ 已导出 {count} 张图片','t.exportImagesDoneSkipped':'✅ 已导出 {count} 张图片，跳过了 {skipped} 张已存在图片','t.exportImagesAllSkipped':'ℹ️ 图片全部已存在，跳过导出','t.exportImgSizeLimitTooSmall':'⚠️ 图片限制下载过小，请修改设置！','t.noImagesToExport':'没有可导出的图片','l.imgMaxKB':'图片限制下载大小：','n.imgMaxKB':'当图片大小超过该值时，会立即中断下载，以防止下载到未压缩图片，值为0时不做限制','b.interruptExport':'⏹ 中断导出','ui.imagesOnly':'仅图片',
   },
   en: {
     'h.settings':'⚙️ Settings','h.subtitle':'Adjust export options, saved locally',
@@ -1126,12 +1125,12 @@ const I18N = {
     'n.theme':'Light is the default theme; Dark is a dark theme; System follows the OS setting automatically','n.linsheUrl':'Changes the API URL (default: http://localhost:3099). Click "Reconnect" after changing to apply immediately','n.userName':'Changes the display name shown in exports (default: "我")','n.facePrefix':'This prefix + avatar filename = avatar link in copied text. Leave empty to use only the filename. Example: If input http://192.168.31.24:37777/Notepic/Icon/ , face link = http://192.168.31.24:37777/Notepic/Icon/user_avatar.png','n.imgPrefix':'Same as avatar prefix. Leave empty to use only filename (no extension) + the extension selected below.','n.imgExt':'Changes the extension used in exported image links and saved image filenames','n.chatboxStyle':'The last three styles are recommended for circular avatars','n.chatTitle':'Default: "Role/Group". Supports same variables as MD filename ({{role}}, {{YYYY}}, etc.), replaced when rendering','n.mdTemplate':'Template variables: {{mdFileName}} MD filename (no .md) · {{title}} Chat title · {{date}} Date (YYYY-MM-DD) · {{time}} Time (HH:mm) · {{role}} Current chat name · {{previousFileName}} Previous MD filename · {{content}} Message body','n.mdFileNamePrivate':'Variable buttons insert at cursor. {{YYYY}}{{MM}}{{DD}} = chat date, {{hh}}{{mm}}{{ss}} = message time. Max 260 chars.','n.mdFileNameGroup':'Variable buttons insert at cursor. {{YYYY}}{{MM}}{{DD}} = chat date, {{hh}}{{mm}}{{ss}} = message time. Max 260 chars.','n.mdDirectObsidian':'When "Yes", "Export MD" creates files via obsidian://new (Obsidian must be installed). "Batch Export MD" always uses the MD export folder setting below. When "No", "Export MD" uses the MD export folder.','n.mdFolder':'Only used when "Add MD files directly to Obsidian" is "Yes". Path relative to Obsidian vault root. Use "/" for subfolders, e.g. "Diary/{{YYYY}}{{MM}}{{DD}}_linsheMD"','n.mdExportDir':'Pre-select MD export folder (Chrome/Edge). If not set, you will be prompted during export.','n.mdSubFolder':'Creates subfolders automatically when exporting to the local folder, for easy organization','n.imgExportDir':'Pre-select image export folder (Chrome/Edge). If not set, you will be prompted during export.','n.imgSubFolder':'Creates subfolders automatically when exporting images to the local folder, for easy organization','n.exportAvatars':'Export all character and user avatars to a folder. If folder selection is not supported, files will be downloaded to the default download folder.','n.maxFileSize':'Recommended max 50KB, otherwise Obsidian may lag when opening large files.','n.emojiExportDir':'Same as above',
     'b.reconnect':'🔄 Reconnect','b.exportAvatars':'📷 Export Avatars','b.chooseMdDir':'📁 Choose MD Export Folder','b.chooseImgDir':'📁 Choose Image Export Folder','b.chooseEmojiDir':'📁 Choose Emoji Export Folder','b.newTemplate':'＋ New Template','b.exportTemplate':'📤 Export Template','b.importTemplate':'📥 Import Template','b.save':'💾 Save','b.reset':'↺ Reset','b.exportSettings':'📤 Export Settings','b.importSettings':'📥 Import Settings','b.copySelected':'📋 Copy Selected','b.exportMd':'📄 Export MD','b.clear':'✕ Clear','b.batchExport':'🗂 Batch Export MD','b.go':'GO',
     'tab.private':'Private','tab.group':'Group',
-    'ui.searchPlaceholder':'Search characters/groups…','ui.msgSearchPlaceholder':'Space-separated keywords (content/ID/role/date), +expand -exclude','ui.selectAllPrefix':'Selected','ui.selectAllMsg':'messages and','ui.selectAllImg':'images','ui.selectAllHint':'Check two non-consecutive messages to auto-select all between them','ui.exportFromLabel':'Exported up to ID:','ui.pageJump':'Jump','ui.exportOverlay':'Exporting, please wait…','ui.chatTitlePlaceholder':'← Select a chat from the left','ui.selectChatHint':'Select a chat from the left','ui.notSet':'Not set, will prompt during export','ui.folderSelected':'Selected: ','ui.subtitle':'View & Select Copy','ui.exportOverlayBatch':'Batch exporting {count} MD files…','ui.pageTitle':'Linshe · Chat Exporter','ui.headerTitle':'📋 Linshe · Chat Exporter','ui.connected':'Connected','ui.checkingConnection':'Checking connection…','ui.connectFailed':'Connection failed','ui.selectImg':'Select this image','ui.exportAllTitle':'Batch export messages from the entered ID to the end by date (0 = export all)','ui.settingsPage':'Settings Page',
+    'ui.searchPlaceholder':'Search characters/groups…','ui.msgSearchPlaceholder':'Space-separated keywords (content/ID/role/date), +expand -exclude','ui.selectAllPrefix':'Selected','ui.selectAllMsg':'messages and','ui.selectAllImg':'images','ui.selectAllHint':'Check two non-consecutive messages to auto-select all between them','ui.exportFromLabel':'Exported up to ID:','ui.pageJump':'Jump','ui.exportOverlay':'Exporting, please wait…','ui.chatTitlePlaceholder':'← Select a chat from the left','ui.selectChatHint':'Select a chat from the left','ui.notSet':'Not set, will prompt during export','ui.folderSelected':'Selected: ','ui.subtitle':'View & Select Copy','ui.exportOverlayBatch':'Batch exporting {count} MD files…','ui.pageTitle':'Linshe · Chat Exporter','ui.headerTitle':'📋 Linshe · Chat Exporter','ui.connected':'Connected','ui.checkingConnection':'Checking connection…','ui.connectFailed':'Connection failed','ui.selectImg':'Select this image','ui.jumpContext':'Context','ui.searchHintFound':'Found {filtered} / {total}','ui.searchHintTotal':'{total} messages','ui.clearSearch':'✕ Clear Search','ui.pageInfo':'Page <span class=\"highlight\">{page}</span>/{totalPages} · <span class=\"highlight\">{total}</span> total','ui.exportAllTitle':'Batch export messages from the entered ID to the end by date (0 = export all)','ui.settingsPage':'Settings Page',
     'ui.noResults':'No matching results','ui.noData':'No data','ui.noSearchResults':'No matching messages','ui.tryOtherKeywords':'Try other keywords','ui.noMessages':'No messages yet','ui.msgCount':'{count} total','ui.filteredCount':'{total} total · {filtered} filtered','ui.loadingMessages':'Loading messages…',
-    'tt.editTemplate':'Edit this template','tt.exportTemplate':'Export this template as JSON','tt.importTemplate':'Import JSON to this template','tt.deleteTemplate':'Delete this template',
+    'tt.editTemplate':'Edit this template','tt.exportTemplate':'Export this template as JSON','tt.importTemplate':'Import JSON to this template','tt.deleteTemplate':'Delete this template','tt.jumpContext':'Jump to original chat','tt.exportFromLabel':'Batch export starting from the first message after this ID','tt.reconnect':'Reconnect using the current URL and refresh the character/group list','tt.pageFirst':'First page','tt.pagePrev':'Previous page','tt.pageNext':'Next page','tt.pageLast':'Last page','tt.setDefaultTemplate':'Set as default template','tt.selectTimeDivider':'Select time divider',
     'tab.settings':'Settings',
     'vb.年':'Year','vb.月':'Month','vb.日':'Day','vb.时':'Hour','vb.分':'Minute','vb.秒':'Second','vb.角色名/群聊名':'Role/Group','vb.标题':'Title','vb.md文件名':'MD File Name','vb.日期':'Date','vb.时间':'Time','vb.日期时间':'Date/Time','vb.上一个md文件名':'Previous MD File','vb.聊天记录正文':'Content',
-    't.exportDone':'✅ Batch export complete, {count} files total','t.exportDoneSkipped':'✅ Batch export complete: {count} new, {skipped} existing skipped','t.exportStart':'Starting batch export of {count} MD files…','t.noMessages':'No messages to export','t.allExported':'All exported, no duplicates','t.selectMdDir':'⚠️ Please select "MD Export Folder" first (in settings page)','t.selectImgDir':'⚠️ Please select "Image Export Folder" first','t.imageFailed':'⚠️ {count} images failed to download (skipped)','t.settingsSaved':'✅ Settings saved','t.settingsReset':'✅ Settings reset to defaults','t.settingsExported':'✅ Settings exported as JSON file','t.settingsImported':'✅ Settings imported from JSON file','t.settingsImportFailed':'⚠️ Import failed: invalid file format','t.operationInProgress':'⏳ Operation in progress, please wait…','t.folderSelected':'✅ {which} export folder selected: {name}','t.folderSelectFailed':'Folder selection failed: {msg}','t.imageDirWarning':'⚠️ Images will be downloaded to default folder; may be blocked. Recommended to set "Image export folder" first','t.exportOverlay':'Batch exporting {count} MD files…','t.copyCount':'📋 Copy Selected ({count})','t.exportFromTooBig':'Export ID cannot be greater than the last message ID','t.idNotFound':'Message ID not found','t.templateExported':'✅ Template exported as JSON','t.templateImported':'✅ Template imported','t.templateImportFailed':'❌ Template import failed: invalid JSON','t.fileTooLong':'⚠️ File {relPath} is too long ({size}MB), fell back to local export','t.dirNotFound':'⚠️ {which} export folder not found, please reselect','t.writeFailed':'⚠️ Folder write failed, export stopped','t.noDirPicker':'Your browser does not support folder selection (requires Chrome/Edge)','t.chooseDirPrompt':'Please select {which} export folder','t.folderSelectFailFallback':'Folder selection failed, using default download folder','t.noSelectionExport':'Please select messages or images to export first','t.mdExported':'✅ MD file exported to folder: {name}','t.mdExportedRenamed':'✅ File with same name existed, renamed to: {name}','t.mdWriteFailed':'⚠️ Failed to write MD export folder','t.mdTooLongNoDir':'⚠️ Content too long for Obsidian, and no MD export folder set. Please set "MD Export Folder" in settings first','t.obsidianSent':'✅ Sent to Obsidian to create note','t.mdDownloadStarted':'✅ MD file export started (default download)','t.mdExportStarted':'✅ MD file export started','t.mdWriteFailed2':'MD file write failed: ','t.noMdDirBatch':'⚠️ No MD export folder selected, batch export stopped','t.reconnecting':'🔄 Reconnecting…','t.connectFailCheck':'❌ Connection failed: please check "Linshe URL" setting','t.reconnected':'✅ Reconnected','t.loadCharsFail':'Failed to load characters: ','t.loadGroupsFail':'Failed to load groups: ','t.loadMsgsFail':'Failed to load messages: ','t.loadGroupMsgsFail':'Failed to load group messages: ','t.busySwitch':'⚠️ Copy/export/download in progress, please wait before switching','t.busySwitchChat':'⚠️ Copy/export/download in progress, please wait before switching chats','t.avatarExportNoAvatars':'ℹ️ No avatars to export','t.avatarExportStart':'📷 Exporting {count} avatars…','t.avatarExportDone':'✅ Exported {count} avatar files ({skipped} duplicates skipped)','t.searchClears':'Searching will clear current selection','t.pageRange':'Page number must be between 1 and {total}','t.ctxNotFound':'Message context not found','t.pageJumped':'Jumped to page {page}','t.noImgDir':'⚠️ No image export folder set, images will download to default folder','t.noSelectionCopy':'Please select messages or images to copy first','t.nothingSelected':'No messages or images selected','t.copied':'✅ Copied {count} items','t.copyFailed':'Copy failed, please try manually','t.exportInterrupted':'⏹ Export interrupted, not all tasks completed','t.exportInterruptedImgSize':'⚠️ Export interrupted due to oversized image, please check if all images are compressed','t.exportInterruptedImgSize2':'⚠️ Some images still not compressed, please check if all images are compressed','t.imgSizeSkipped':'Some images were skipped due to size limit','t.exportImagesOnlyDone':'✅ Exported {count} images','t.exportImagesDoneSkipped':'✅ Exported {count} images, {skipped} existing skipped','t.exportImagesAllSkipped':'ℹ️ All images already exist, skipped','t.exportImgSizeLimitTooSmall':'⚠️ Image size limit is too small, please update the setting!','t.noImagesToExport':'No images to export','l.imgMaxKB':'Image download size limit:','n.imgMaxKB':'When an image exceeds this size, the export will be interrupted immediately to prevent downloading uncompressed images. Set to 0 for no limit.','b.interruptExport':'⏹ Interrupt Export','ui.imagesOnly':'Images Only',
+    't.exportDone':'✅ Batch export complete, {count} files total','t.exportDoneSkipped':'✅ Batch export complete: {count} new, {skipped} existing skipped','t.exportStart':'Starting batch export of {count} MD files…','t.noMessages':'No messages to export','t.allExported':'All exported, no duplicates','t.selectMdDir':'⚠️ Please select "MD Export Folder" first (in settings page)','t.selectImgDir':'⚠️ Please select "Image Export Folder" first','t.imageFailed':'⚠️ {count} images failed to download (skipped)','t.jumpToId':'Jumped to ID: {id} (page {page})','t.mdZipDownloaded':'✅ MD + images downloaded as ZIP','t.zipDone':'✅ ZIP complete: {count} files','t.imgZipDone':'✅ Image ZIP complete: {count} images','t.settingsSaved':'✅ Settings saved','t.settingsReset':'✅ Settings reset to defaults','t.settingsExported':'✅ Settings exported as JSON file','t.settingsImported':'✅ Settings imported from JSON file','t.settingsImportFailed':'⚠️ Import failed: invalid file format','t.operationInProgress':'⏳ Operation in progress, please wait…','t.folderSelected':'✅ {which} export folder selected: {name}','t.folderSelectFailed':'Folder selection failed: {msg}','t.imageDirWarning':'⚠️ Images will be downloaded to default folder; may be blocked. Recommended to set "Image export folder" first','t.exportOverlay':'Batch exporting {count} MD files…','t.copyCount':'📋 Copy Selected ({count})','t.exportFromTooBig':'Export ID cannot be greater than the last message ID','t.idNotFound':'Message ID not found','t.templateExported':'✅ Template exported as JSON','t.templateImported':'✅ Template imported','t.templateImportFailed':'❌ Template import failed: invalid JSON','t.fileTooLong':'⚠️ File {relPath} is too long ({size}MB), fell back to local export','t.dirNotFound':'⚠️ {which} export folder not found, please reselect','t.writeFailed':'⚠️ Folder write failed, export stopped','t.noDirPicker':'Your browser does not support folder selection (requires Chrome/Edge)','t.chooseDirPrompt':'Please select {which} export folder','t.folderSelectFailFallback':'Folder selection failed, using default download folder','t.noSelectionExport':'Please select messages or images to export first','t.mdExported':'✅ MD file exported to folder: {name}','t.mdExportedRenamed':'✅ File with same name existed, renamed to: {name}','t.mdWriteFailed':'⚠️ Failed to write MD export folder','t.mdTooLongNoDir':'⚠️ Content too long for Obsidian, and no MD export folder set. Please set "MD Export Folder" in settings first','t.obsidianSent':'✅ Sent to Obsidian to create note','t.mdDownloadStarted':'✅ MD file export started (default download)','t.mdExportStarted':'✅ MD file export started','t.mdWriteFailed2':'MD file write failed: ','t.noMdDirBatch':'⚠️ No MD export folder selected, batch export stopped','t.reconnecting':'🔄 Reconnecting…','t.connectFailCheck':'❌ Connection failed: please check "Linshe URL" setting','t.reconnected':'✅ Reconnected','t.loadCharsFail':'Failed to load characters: ','t.loadGroupsFail':'Failed to load groups: ','t.loadMsgsFail':'Failed to load messages: ','t.loadGroupMsgsFail':'Failed to load group messages: ','t.busySwitch':'⚠️ Copy/export/download in progress, please wait before switching','t.busySwitchChat':'⚠️ Copy/export/download in progress, please wait before switching chats','t.avatarExportNoAvatars':'ℹ️ No avatars to export','t.avatarExportStart':'📷 Exporting {count} avatars…','t.avatarExportDone':'✅ Exported {count} avatar files ({skipped} duplicates skipped)','t.searchClears':'Searching will clear current selection','t.pageRange':'Page number must be between 1 and {total}','t.ctxNotFound':'Message context not found','t.pageJumped':'Jumped to page {page}','t.noImgDir':'⚠️ No image export folder set, images will download to default folder','t.noSelectionCopy':'Please select messages or images to copy first','t.nothingSelected':'No messages or images selected','t.copied':'✅ Copied {count} items','t.copyFailed':'Copy failed, please try manually','t.exportInterrupted':'⏹ Export interrupted, not all tasks completed','t.exportInterruptedImgSize':'⚠️ Export interrupted due to oversized image, please check if all images are compressed','t.exportInterruptedImgSize2':'⚠️ Some images still not compressed, please check if all images are compressed','t.imgSizeSkipped':'Some images were skipped due to size limit','t.exportImagesOnlyDone':'✅ Exported {count} images','t.exportImagesDoneSkipped':'✅ Exported {count} images, {skipped} existing skipped','t.exportImagesAllSkipped':'ℹ️ All images already exist, skipped','t.exportImgSizeLimitTooSmall':'⚠️ Image size limit is too small, please update the setting!','t.noImagesToExport':'No images to export','l.imgMaxKB':'Image download size limit:','n.imgMaxKB':'When an image exceeds this size, the export will be interrupted immediately to prevent downloading uncompressed images. Set to 0 for no limit.','b.interruptExport':'⏹ Interrupt Export','ui.imagesOnly':'Images Only',
   }
 };
 function t(key, vars) {
@@ -1432,7 +1431,7 @@ function jumpToExportId() {
   autoPageCooldown = Date.now();
   suppressAutoPageUntil = Date.now() + 1500;
   scrollToCenterMessage(id);
-  showToast(`已跳转到 ID: ${id}（第 ${page} 页）`, 'info');
+  showToast(t('t.jumpToId', { id, page }), 'info');
 }
 // 公共：滚动到消息 ID 所在位置并居中（使用 requestAnimationFrame 链校准）
 // 替代两处重复的 centerCalibrate 内联函数
@@ -1712,16 +1711,16 @@ function renderMdTemplateList() {
   const list = $('mdTemplateList');
   if (!list) return;
   const tpls = getMdTemplates();
-  list.innerHTML = tpls.map(t => `
-    <div class="md-template-item${mdTemplateEditingId === t.id ? ' active' : ''}">
-      <label class="md-template-radio" title="设为默认模板">
-        <input type="radio" name="mdDefaultTemplate" ${settings.mdTemplateDefaultId === t.id ? 'checked' : ''} onchange="setDefaultMdTemplate('${t.id}')">
+  list.innerHTML = tpls.map(tpl => `
+    <div class="md-template-item${mdTemplateEditingId === tpl.id ? ' active' : ''}">
+      <label class="md-template-radio" title="${t('tt.setDefaultTemplate')}">
+        <input type="radio" name="mdDefaultTemplate" ${settings.mdTemplateDefaultId === tpl.id ? 'checked' : ''} onchange="setDefaultMdTemplate('${tpl.id}')">
       </label>
-      <span class="md-template-name" onclick="selectMdTemplate('${t.id}')" title="${escapeHtmlAttr(t.name)}">${escapeHtml(t.name)}</span>
-      <button type="button" class="md-template-btn" onclick="selectMdTemplate('${t.id}')" data-i18n-title="tt.editTemplate">✏️</button>
-      <button type="button" class="md-template-btn" onclick="exportMdTemplate('${t.id}')" data-i18n-title="tt.exportTemplate">📤</button>
-      <button type="button" class="md-template-btn" onclick="importMdTemplate('${t.id}')" data-i18n-title="tt.importTemplate">📥</button>
-      ${t.id === 'default' ? '' : `<button type="button" class="md-template-btn" onclick="deleteMdTemplate('${t.id}')" data-i18n-title="tt.deleteTemplate">🗑</button>`}
+      <span class="md-template-name" onclick="selectMdTemplate('${tpl.id}')" title="${escapeHtmlAttr(tpl.name)}">${escapeHtml(tpl.name)}</span>
+      <button type="button" class="md-template-btn" onclick="selectMdTemplate('${tpl.id}')" data-i18n-title="tt.editTemplate">✏️</button>
+      <button type="button" class="md-template-btn" onclick="exportMdTemplate('${tpl.id}')" data-i18n-title="tt.exportTemplate">📤</button>
+      <button type="button" class="md-template-btn" onclick="importMdTemplate('${tpl.id}')" data-i18n-title="tt.importTemplate">📥</button>
+      ${tpl.id === 'default' ? '' : `<button type="button" class="md-template-btn" onclick="deleteMdTemplate('${tpl.id}')" data-i18n-title="tt.deleteTemplate">🗑</button>`}
     </div>`).join('');
 }
 
@@ -2510,7 +2509,7 @@ async function exportSelectedMdImpl() {
         if (zipEntries.length > 0) {
           const zipName = `${fileName.replace(/\.md$/, '')}_${new Date().toISOString().slice(0, 10)}.zip`;
           downloadZipBlob(createZipBlob(zipEntries), zipName);
-          showToast('✅ md + 图片已打包为 ZIP 下载', 'success');
+          showToast(t('t.mdZipDownloaded'), 'success');
         }
       } else {
         downloadTextFile(fileName, content);
@@ -2532,7 +2531,7 @@ async function exportSelectedMdImpl() {
     if (zipEntries.length > 0) {
       const zipName = `${fileName.replace(/\.md$/, '')}_${new Date().toISOString().slice(0, 10)}.zip`;
       downloadZipBlob(createZipBlob(zipEntries), zipName);
-      showToast('✅ md + 图片已打包为 ZIP 下载', 'success');
+      showToast(t('t.mdZipDownloaded'), 'success');
     }
   } else {
     downloadTextFile(fileName, content);
@@ -2764,7 +2763,7 @@ async function exportAllMdCore() {
   if (zipEntries && zipEntries.length > 0) {
     const zipName = `${state.currentName || 'export'}_${new Date().toISOString().slice(0, 10)}.zip`;
     downloadZipBlob(createZipBlob(zipEntries), zipName);
-    showToast('✅ ZIP 打包完成，共 ' + zipEntries.length + ' 个文件', 'success');
+    showToast(t('t.zipDone', { count: zipEntries.length }), 'success');
   }
   // 记录本次导出范围最后一条消息的 ID（范围总是到末尾，即当前对话最后一条），
   // 并同步文本框；下次范围批量导出从该 ID 之后继续，不重复导出
@@ -2952,7 +2951,7 @@ async function exportAllImagesOnly() {
   if (zipEntries && zipEntries.length > 0) {
     const zipName = `${state.currentName || 'images'}_${new Date().toISOString().slice(0, 10)}.zip`;
     downloadZipBlob(createZipBlob(zipEntries), zipName);
-    showToast('✅ 图片 ZIP 打包完成，共 ' + zipEntries.length + ' 张', 'success');
+    showToast(t('t.imgZipDone', { count: zipEntries.length }), 'success');
   }
   if (state.interruptExport && state.interruptReason === 'imgSize' && state.interruptMsgId > 0) {
     if (fromId === 0) {
@@ -3209,7 +3208,7 @@ async function downloadImagesBatched(imgs, folderRel, batchSize = 5) {
     downloadZipBlob(createZipBlob(zipEntries), zipName);
   }
   if (failed > 0) {
-    showToast(`⚠️ ${failed} 张图片下载失败（网络超时或加载错误，已跳过）`, 'error');
+    showToast(t('t.imageFailed', { count: failed }), 'error');
   }
 }
 
@@ -3298,7 +3297,7 @@ async function downloadImagesToDir(imgs, dirHandle, batchSize = 10) {
     if (state.interruptExport) break;
   }
   if (failed > 0) {
-    showToast(`⚠️ ${failed} 张图片下载失败（网络超时或加载错误，已跳过）`, 'error');
+    showToast(t('t.imageFailed', { count: failed }), 'error');
   }
   return { downloaded, skipped };
 }
@@ -3780,12 +3779,12 @@ function switchTab(tab) {
   updateToolbar();
   renderSidebar();
   if (isSettings) {
-    fillSettingsPanel();
     messageList.innerHTML = '';
     messageList.style.display = 'none';
     searchBar.style.display = 'none';
     paginationBar.style.display = 'none';
     selectAllBar.style.display = 'none';
+    fillSettingsPanel();
     return;
   }
   messageList.style.display = 'flex';
@@ -3961,14 +3960,14 @@ function renderSearchBar() {
   const hint = searchBar.querySelector('.search-hint');
   if (hint) {
     hint.className = 'search-hint' + (state.searchQuery ? ' has-results' : '');
-    hint.textContent = state.searchQuery ? `找到 ${filtered} / ${total} 条` : `${total} 条消息`;
+    hint.textContent = state.searchQuery ? t('ui.searchHintFound', { filtered, total }) : t('ui.searchHintTotal', { total });
   }
   let clearBtn = searchBar.querySelector('.btn-clear-search');
   if (state.searchQuery) {
     if (!clearBtn) {
       clearBtn = document.createElement('button');
       clearBtn.className = 'btn-clear-search';
-      clearBtn.textContent = '✕ 清除搜索';
+      clearBtn.textContent = t('ui.clearSearch');
       clearBtn.onclick = clearSearch;
       searchBar.appendChild(clearBtn);
     }
@@ -4175,7 +4174,7 @@ function updatePaginationHighlight() {
   const page = state.currentPage;
   const totalPages = state.totalPages;
   const total = state.filteredMessages.length;
-  pageInfo.innerHTML = `第 <span class="highlight">${page}</span>/${totalPages} 页 · 共 <span class="highlight">${total}</span> 条`;
+  pageInfo.innerHTML = t('ui.pageInfo', { page, totalPages, total });
   pageFirst.disabled = page <= 1;
   pagePrev.disabled = page <= 1;
   pageNext.disabled = page >= totalPages;
@@ -4297,7 +4296,7 @@ function prependPrevPage() {
           const tdChecked = state.selectedTimeDividerKeys.has(tdKey);
           const tdTime = formatTime(curFirstMsg.created_at);
           const tdHtml = `<div class="time-divider-gap" data-td-key="${tdKey}">
-                            <input type="checkbox" class="td-checkbox" data-td-key="${tdKey}" ${tdChecked ? 'checked' : ''} onchange="toggleTimeDivider(this)" title="选择时间分割线">
+                            <input type="checkbox" class="td-checkbox" data-td-key="${tdKey}" ${tdChecked ? 'checked' : ''} onchange="toggleTimeDivider(this)" title="${t('tt.selectTimeDivider')}">
                             <span class="td-line-left"></span><span class="td-label">${escapeHtml(tdTime)}</span><span class="td-line-right"></span>
                           </div>`;
           // 如果已经有日期分隔线，用时间分割线替换
@@ -4544,7 +4543,7 @@ function renderPagination() {
   const page = state.currentPage;
   const totalPages = state.totalPages;
 
-  pageInfo.innerHTML = `第 <span class="highlight">${page}</span>/${totalPages} 页 · 共 <span class="highlight">${total}</span> 条`;
+  pageInfo.innerHTML = t('ui.pageInfo', { page, totalPages, total });
   pageFirst.disabled = page <= 1;
   pagePrev.disabled = page <= 1;
   pageNext.disabled = page >= totalPages;
@@ -4577,7 +4576,7 @@ function buildMessagesHtml(msgs, startDate, startMsgTime) {
         const tdChecked = state.selectedTimeDividerKeys.has(tdKey);
         const tdTime = formattedTime;
         timeDividerHtml = `<div class="time-divider-gap" data-td-key="${tdKey}">
-                            <input type="checkbox" class="td-checkbox" data-td-key="${tdKey}" ${tdChecked ? 'checked' : ''} onchange="toggleTimeDivider(this)" title="选择时间分割线">
+                            <input type="checkbox" class="td-checkbox" data-td-key="${tdKey}" ${tdChecked ? 'checked' : ''} onchange="toggleTimeDivider(this)" title="${t('tt.selectTimeDivider')}">
                             <span class="td-line-left"></span><span class="td-label">${escapeHtml(tdTime)}</span><span class="td-line-right"></span>
                           </div>`;
         // 如果日期分隔线和时间分割线连续，只显示时间分割线（跳过日期分隔线）
@@ -4638,7 +4637,7 @@ function buildMessagesHtml(msgs, startDate, startMsgTime) {
 
     // Jump-to-context button (only show when search is active)
     const jumpBtn = state.searchQuery
-      ? `<button class="btn-jump-context" onclick="event.stopPropagation();jumpToContext(${m.id})" title="跳转到原始聊天记录，查看上下文"><span class="icon">📎</span> 上下文</button>`
+      ? `<button class="btn-jump-context" onclick="event.stopPropagation();jumpToContext(${m.id})" title="${t('tt.jumpContext')}"><span class="icon">📎</span> ${t('ui.jumpContext')}</button>`
       : '';
 
     let cls = 'msg';
