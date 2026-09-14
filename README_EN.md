@@ -44,11 +44,11 @@ Once connected, your private chat contacts will appear in the sidebar.
 
 Click on a character to select their conversations. You can manually pick which ones to export, or auto-export everything.
 
-![Sidebar showing chat contact list with conversation selection](images/sidebar-contacts-selection.jpg)
+![Sidebar showing chat contact list with conversation selection](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/sidebar-contacts-selection.jpg)
 
 **Copy Selected** is the lightest option — it downloads selected images, formats the text, and copies everything to your clipboard for easy editing.
 
-![Copy selected feature: downloads images and formats text to clipboard](images/copy-selected-messages.jpg)
+![Copy selected feature: downloads images and formats text to clipboard](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/copy-selected-messages.jpg)
 
 Chat logs can be browsed page by page with ease, and you can **search and filter** messages, matching content/ID/date/character name:
 
@@ -60,7 +60,7 @@ Exclude: -keyword1
 
 Click **Context** to jump directly to the original chat in LinShe.
 
-![Search filter and context jump back to original chat](images/search-filter-context-jump.jpg)
+![Search filter and context jump back to original chat](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/search-filter-context-jump.jpg)
 
 Batch export splits files by date. You can set the maximum KB size per markdown file — when exceeded, the file is automatically split further.
 
@@ -75,7 +75,7 @@ I strongly recommend **visiting Settings** before your first export.
 
 Set up the three export folders (markdown, images, stickers) properly.
 
-![Settings page: configure export folders for md, images, and stickers](images/settings-export-folders.jpg)
+![Settings page: configure export folders for md, images, and stickers](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/settings-export-folders.jpg)
 
 This enables the exporter's **deduplication** feature, preventing redundant downloads during incremental exports.
 
@@ -85,7 +85,7 @@ It also makes batch exports of large volumes much faster and more stable!
 
 If your Obsidian vault uses an external image library, you can set an image URL prefix in the settings.
 
-![Settings page: image URL prefix configuration](images/settings-image-url-prefix.jpg)
+![Settings page: image URL prefix configuration](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/settings-image-url-prefix.jpg)
 
 If you're using local images, leave this blank.
 
@@ -95,7 +95,7 @@ Choose from 7 speech bubble styles. The default is LinShe's native style.
 
 (About 90% faithful to the original — pretty close!)
 
-![Seven speech bubble style options, defaulting to LinShe's native style](images/settings-bubble-styles.jpg)
+![Seven speech bubble style options, defaulting to LinShe's native style](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/settings-bubble-styles.jpg)
 
 ### Markdown Template Settings
 
@@ -105,13 +105,13 @@ Batch export supports the previous file name variable:
 
 For example, write `previous:: [[{{previousFileName}}]]` in your template, and every exported markdown file will be linked together — great for breadcrumb plugins or Dataview navigation.
 
-![Markdown template settings: variable substitution and previous file name linking](images/settings-md-template.jpg)
+![Markdown template settings: variable substitution and previous file name linking](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/settings-md-template.jpg)
 
 ### Export Avatars
 
 Since avatars only need to be exported once, this option is placed at the bottom of Settings.
 
-![Settings page: avatar export options](images/settings-export-avatar.jpg)
+![Settings page: avatar export options](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/settings-export-avatar.jpg)
 
 
 ## Preview in Obsidian
@@ -124,23 +124,23 @@ Regular users don't need to worry about the code format — the exporter handles
 
 Example output generated with the default template.
 
-![Chat logs displayed in Obsidian with light theme](images/light-theme-preview.jpg)
+![Chat logs displayed in Obsidian with light theme](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/light-theme-preview.jpg)
 
 ### Dark Theme
 
-![Chat logs displayed in Obsidian with dark theme](images/dark-theme-preview.jpg)
+![Chat logs displayed in Obsidian with dark theme](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/dark-theme-preview.jpg)
 
 ### Group Chat Names & Stickers
 
-![Group chat names and stickers displayed in Obsidian](images/group-chat-stickers.jpg)
+![Group chat names and stickers displayed in Obsidian](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/group-chat-stickers.jpg)
 
 ### Italic & Bold Enhancements
 
 Text wrapped in `（）` (parentheses for action descriptions) is automatically italicized. If `！` or `？` appears more than twice in a row, it's bolded. A little polish ✨
 
-![Action descriptions in parentheses with italic formatting](images/italic-formatting-example-1.jpg)
+![Action descriptions in parentheses with italic formatting](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/italic-formatting-example-1.jpg)
 
-![Exclamation/question marks bolded when used more than twice](images/italic-formatting-example-2.jpg)
+![Exclamation/question marks bolded when used more than twice](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/italic-formatting-example-2.jpg)
 
 ### More Details
 

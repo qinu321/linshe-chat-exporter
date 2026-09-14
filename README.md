@@ -44,11 +44,11 @@
 
 点击想导出聊天记录的角色，可以手动勾选想导出的对话，也能自动批量导出全部记录。
 
-![侧边栏显示私聊角色列表及对话勾选界面](images/sidebar-contacts-selection.jpg)
+![侧边栏显示私聊角色列表及对话勾选界面](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/sidebar-contacts-selection.jpg)
 
 复制选中是最轻量的，它只会下载选中的图片，把文本格式化处理后复制到你的剪贴板，方便编辑
 
-![复制选中功能：下载图片并格式化文本到剪贴板](images/copy-selected-messages.jpg)
+![复制选中功能：下载图片并格式化文本到剪贴板](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/copy-selected-messages.jpg)
 
 聊天记录可以轻松按页数查看，也能**搜索过滤**，匹配内容/ID/日期/角色名
 
@@ -60,7 +60,7 @@ OR：+关键词1  +关键词2
 
 点击`上下文`就能直接跳转到原聊天记录
 
-![搜索过滤与上下文跳转至原聊天记录](images/search-filter-context-jump.jpg)
+![搜索过滤与上下文跳转至原聊天记录](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/search-filter-context-jump.jpg)
 
 批量导出是按日期进行分割的，且能设置md文档的最大KB数，超出限制会自动再进行分割。
 
@@ -75,7 +75,7 @@ OR：+关键词1  +关键词2
 
 把导出的3个文件夹（md、图片、表情包）给设置好
 
-![设置页面：配置md、图片、表情包三个导出文件夹路径](images/settings-export-folders.jpg)
+![设置页面：配置md、图片、表情包三个导出文件夹路径](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/settings-export-folders.jpg)
 
 这样导出器的**查重功能**就能正常运作，增量导出时能防止重复下载。
 
@@ -87,7 +87,7 @@ OR：+关键词1  +关键词2
 
 在设置里也能设置图片链接的前缀
 
-![设置页面：图片链接前缀配置项](images/settings-image-url-prefix.jpg)
+![设置页面：图片链接前缀配置项](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/settings-image-url-prefix.jpg)
 
 使用本地图片的话强烈建议留空
 
@@ -97,7 +97,7 @@ OR：+关键词1  +关键词2
 
 （尽量还原到9成了，还算原汁原味）
 
-![七种气泡框样式选择预览，默认为邻舍本体样式](images/settings-bubble-styles.jpg)
+![七种气泡框样式选择预览，默认为邻舍本体样式](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/settings-bubble-styles.jpg)
 
 ### md模板设置
 
@@ -109,13 +109,13 @@ OR：+关键词1  +关键词2
 
 就能自动将整批导出的md文档都链接起来，方便面包屑插件或是dv代码的导航。
 
-![md模板设置：支持变量替换与上一篇文件名链接](images/settings-md-template.jpg)
+![md模板设置：支持变量替换与上一篇文件名链接](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/settings-md-template.jpg)
 
 ### 导出头像
 
 考虑到头像只有第一次需要导出，所以放在设置的最后面了
 
-![设置页面：导出头像功能选项](images/settings-export-avatar.jpg)
+![设置页面：导出头像功能选项](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/settings-export-avatar.jpg)
 
 
 ## 在Obsidian里的展示效果
@@ -128,23 +128,23 @@ OR：+关键词1  +关键词2
 
 例图为使用默认模板自动生成的效果
 
-![浅色样式下聊天记录在Obsidian中的展示效果](images/light-theme-preview.jpg)
+![浅色样式下聊天记录在Obsidian中的展示效果](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/light-theme-preview.jpg)
 
 ### 深色样式
 
-![深色样式下聊天记录在Obsidian中的展示效果](images/dark-theme-preview.jpg)
+![深色样式下聊天记录在Obsidian中的展示效果](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/dark-theme-preview.jpg)
 
 ### 群聊名字和表情包
 
-![群聊名称显示与表情包在Obsidian中的展示效果](images/group-chat-stickers.jpg)
+![群聊名称显示与表情包在Obsidian中的展示效果](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/group-chat-stickers.jpg)
 
 ### 补充斜体和粗体
 
 带`（）`的动作描写会加上斜体，`！`或`？`的数量超过2个就会加上粗体，一点小润色
 
-![动作描写的括号斜体润色效果示例](images/italic-formatting-example-1.jpg)
+![动作描写的括号斜体润色效果示例](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/italic-formatting-example-1.jpg)
 
-![感叹号问号超过2个时加粗的润色效果示例](images/italic-formatting-example-2.jpg)
+![感叹号问号超过2个时加粗的润色效果示例](https://raw.githubusercontent.com/qinu321/linshe-chat-exporter/main/images/italic-formatting-example-2.jpg)
 
 ### 更详细的说明
 
