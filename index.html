@@ -1611,6 +1611,8 @@ function resetSettings() {
   }
   // 立即写回：此时 localStorage 已被清空，若不同步写回，刷新页面后自定义模板会丢失
   try { localStorage.setItem('linsheExporterSettings', JSON.stringify(settings)); } catch (e) {}
+  // 同时清除 IndexedDB 中持久化的文件夹句柄，防止旧句柄在新设置下引发权限/目录不存在的错误
+  clearExportDir('md'); clearExportDir('img'); clearExportDir('emoji'); clearExportDir('avatar');
   fillSettingsPanel();
   applyTheme();
   showToast(t('t.settingsReset'), 'success');
