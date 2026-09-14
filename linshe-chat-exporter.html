@@ -2587,6 +2587,10 @@ const exportSelectedMd = withBusy(BUSY_KEYS.EXPORT_MD, exportSelectedMdImpl);
 // 范围批量导出 md：从文本框"已导出到 ID"之后的消息开始，按聊天记录日期分组，
 // 每组内容超过 30KB 时按大小继续分割，每个 md 文件 ≤30KB（大致，单条超大消息允许独占文件）
 async function exportAllMdCore() {
+  // 清除上次残留的中断标志，避免上一次导出的 imgMaxKB 中断污染本次导出
+  state.interruptExport = false;
+  state.interruptReason = '';
+  state.interruptMsgId = 0;
   const msgs = state.currentMessages;
   if (!msgs || msgs.length === 0) {
     showToast(t('t.noMessages'), 'error');
@@ -2852,6 +2856,10 @@ const exportAllMd = withBusy(BUSY_KEYS.EXPORT_ALL, exportAllMdImpl);
 
 // 仅图片批量导出：只导出图片，不导出 md 文件
 async function exportAllImagesOnly() {
+  // 清除上次残留的中断标志，避免上一次导出的 imgMaxKB 中断污染本次导出
+  state.interruptExport = false;
+  state.interruptReason = '';
+  state.interruptMsgId = 0;
   const msgs = state.currentMessages;
   if (!msgs || msgs.length === 0) {
     showToast(t('t.noMessages'), 'error');
@@ -3135,6 +3143,11 @@ async function doExportOneMd(batch, forceAllImages, mdDirHandle, prevFileName, f
       if (!subDirCache) {
         subDirCache = await readDirFileMap(mdSubDir);
         fileCache.set(mdSubDir, subDirCache);
+        // 缓存上限 20 个目录：超出时淘汰最旧条目，防止批量导出多个角色时内存无限增长
+        if (fileCache.size > 20) {
+          const firstKey = fileCache.keys().next().value;
+          if (firstKey !== undefined) fileCache.delete(firstKey);
+        }
       }
     }
     // 同名同大小跳过（去重）、同名不同大小加序号重命名导出
