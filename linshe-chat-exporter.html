@@ -2508,7 +2508,7 @@ async function exportSelectedMdImpl() {
         await _batchFetchImagesToZip(allImgs, zipEntries);
         if (zipEntries.length > 0) {
           const zipName = `${fileName.replace(/\.md$/, '')}_${new Date().toISOString().slice(0, 10)}.zip`;
-          downloadZipBlob(createZipBlob(zipEntries), zipName);
+          downloadZipBlob(await createZipBlob(zipEntries), zipName);
           showToast(t('t.mdZipDownloaded'), 'success');
         }
       } else {
@@ -2530,7 +2530,7 @@ async function exportSelectedMdImpl() {
     await _batchFetchImagesToZip(allImgs, zipEntries);
     if (zipEntries.length > 0) {
       const zipName = `${fileName.replace(/\.md$/, '')}_${new Date().toISOString().slice(0, 10)}.zip`;
-      downloadZipBlob(createZipBlob(zipEntries), zipName);
+      downloadZipBlob(await createZipBlob(zipEntries), zipName);
       showToast(t('t.mdZipDownloaded'), 'success');
     }
   } else {
@@ -2671,6 +2671,7 @@ async function exportAllMdCore() {
   const seenZipNames = new Set(); // ZIP 包全局去重，跨批次同名文件只保留第一个
   // 目录文件缓存：Map<dirHandle, Map<文件名, 大小>>，避免批量导出中重复遍历目录
   const mdDirListingCache = new Map();
+  let lastBatchMsgId = fromId; // 最后一次完整处理完的批次尾部消息 ID，用于中断时准确回退
   for (let i = 0; i < batches.length; i++) {
     for (let attempt = 0; attempt < 2; attempt++) {
       try {
@@ -2742,8 +2743,15 @@ async function exportAllMdCore() {
     if ((i + 1) % 5 === 0 && i < batches.length - 1) {
       await new Promise(r => setTimeout(r, 300));
     }
-    // 中断导出检查
+    // 记录已完整处理的批次尾部消息 ID，供中断时计算游标（必须在中断检查之后更新，
+    // 确保中断时不记录当前未完整处理完的批次）
     if (state.interruptExport) {
+      // ZIP 模式：在中断前先把已有的内容打包下载，避免辛苦 fetch 的图片丢失
+      if (zipEntries && zipEntries.length > 0) {
+        const zipName = `${state.currentName || 'export'}_${new Date().toISOString().slice(0, 10)}.zip`;
+        downloadZipBlob(await createZipBlob(zipEntries), zipName);
+        showToast(t('t.zipDone', { count: zipEntries.length }), 'success');
+      }
       let cursorId;
       if (state.interruptReason === 'imgSize' && state.interruptMsgId > 0) {
         if (fromId === 0 && i === 0) {
@@ -2754,19 +2762,21 @@ async function exportAllMdCore() {
         cursorId = idx > 0 ? rangeMsgs[idx - 1].id : fromId;
         showToast(t('t.exportInterruptedImgSize'), 'error');
       } else {
-        const curMsgs = batches[i].msgs;
-        cursorId = curMsgs[curMsgs.length - 1].id;
+        cursorId = lastBatchMsgId;
         showToast(t('t.exportInterrupted'), 'info');
       }
       setExportCursor(cursorId);
       updateExportFromInput();
       return;
     }
+    // 记录本批尾部消息 ID：只有走到这里才说明本批 md+图片已完整处理
+    const batchMsgs = batches[i].msgs;
+    if (batchMsgs.length > 0) lastBatchMsgId = batchMsgs[batchMsgs.length - 1].id;
   }
   // ZIP 模式：下载打包文件
   if (zipEntries && zipEntries.length > 0) {
     const zipName = `${state.currentName || 'export'}_${new Date().toISOString().slice(0, 10)}.zip`;
-    downloadZipBlob(createZipBlob(zipEntries), zipName);
+    downloadZipBlob(await createZipBlob(zipEntries), zipName);
     showToast(t('t.zipDone', { count: zipEntries.length }), 'success');
   }
   // 记录本次导出范围最后一条消息的 ID（范围总是到末尾，即当前对话最后一条），
@@ -2958,7 +2968,7 @@ async function exportAllImagesOnly() {
   // ZIP 模式：下载打包文件
   if (zipEntries && zipEntries.length > 0) {
     const zipName = `${state.currentName || 'images'}_${new Date().toISOString().slice(0, 10)}.zip`;
-    downloadZipBlob(createZipBlob(zipEntries), zipName);
+    downloadZipBlob(await createZipBlob(zipEntries), zipName);
     showToast(t('t.imgZipDone', { count: zipEntries.length }), 'success');
   }
   if (state.interruptExport && state.interruptReason === 'imgSize' && state.interruptMsgId > 0) {
@@ -3218,7 +3228,7 @@ async function downloadImagesBatched(imgs, folderRel, batchSize = 5) {
   const failed = await _batchFetchImagesToZip(imgs, zipEntries, batchSize);
   if (zipEntries.length > 0) {
     const zipName = `images_${new Date().toISOString().slice(0, 10)}.zip`;
-    downloadZipBlob(createZipBlob(zipEntries), zipName);
+    downloadZipBlob(await createZipBlob(zipEntries), zipName);
   }
   if (failed > 0) {
     showToast(t('t.imageFailed', { count: failed }), 'error');
@@ -3336,43 +3346,47 @@ function _zipPut32(arr, off, v) {
   arr[off] = v & 0xFF; arr[off + 1] = (v >>> 8) & 0xFF;
   arr[off + 2] = (v >>> 16) & 0xFF; arr[off + 3] = (v >>> 24) & 0xFF;
 }
-// 将 {name: string, data: Uint8Array} 条目列表打包为 ZIP Blob
-function createZipBlob(entries) {
+// 将 {name: string, data: Uint8Array} 条目列表打包为 ZIP Blob（Streams API 流式构建）
+// 避免全量拼装大 Uint8Array，构建期峰值内存从 2x 降到 ~1x
+async function createZipBlob(entries) {
   const encoder = new TextEncoder();
-  const localHeaders = [], centralHeaders = [], fileData = [];
+  const centralEntries = [];
   let offset = 0;
-  for (const e of entries) {
-    const nameBytes = encoder.encode(e.name);
-    const data = e.data;
-    const crc = _zipCrc32(data), compSize = data.length, uncompSize = data.length;
-    const lh = new Uint8Array(30 + nameBytes.length);
-    _zipPut32(lh, 0, 0x04034b50); _zipPut16(lh, 4, 20); _zipPut16(lh, 6, 0x0800); _zipPut16(lh, 8, 0);
-    _zipPut32(lh, 14, crc); _zipPut32(lh, 18, compSize); _zipPut32(lh, 22, uncompSize);
-    _zipPut16(lh, 26, nameBytes.length); lh.set(nameBytes, 30);
-    const ch = new Uint8Array(46 + nameBytes.length);
-    _zipPut32(ch, 0, 0x02014b50); _zipPut16(ch, 4, 20); _zipPut16(ch, 6, 20); _zipPut16(ch, 8, 0x0800);
-    _zipPut16(ch, 10, 0); _zipPut32(ch, 16, crc); _zipPut32(ch, 20, compSize);
-    _zipPut32(ch, 24, uncompSize); _zipPut16(ch, 28, nameBytes.length);
-    _zipPut32(ch, 42, offset); ch.set(nameBytes, 46);
-    localHeaders.push(lh); fileData.push(data); centralHeaders.push(ch);
-    offset += lh.length + data.length;
-  }
-  const totalLocalSize = localHeaders.reduce((s, h) => s + h.length, 0);
-  const totalDataSize = fileData.reduce((s, d) => s + d.length, 0);
-  const totalCentralSize = centralHeaders.reduce((s, h) => s + h.length, 0);
-  const eocd = new Uint8Array(22);
-  _zipPut32(eocd, 0, 0x06054b50); _zipPut16(eocd, 8, entries.length);
-  _zipPut16(eocd, 10, entries.length); _zipPut32(eocd, 12, totalCentralSize);
-  _zipPut32(eocd, 16, totalLocalSize + totalDataSize);
-  const result = new Uint8Array(totalLocalSize + totalDataSize + totalCentralSize + 22);
-  let pos = 0;
-  for (let i = 0; i < entries.length; i++) {
-    result.set(localHeaders[i], pos); pos += localHeaders[i].length;
-    result.set(fileData[i], pos); pos += fileData[i].length;
-  }
-  for (const ch of centralHeaders) { result.set(ch, pos); pos += ch.length; }
-  result.set(eocd, pos);
-  return new Blob([result], { type: 'application/zip' });
+  const stream = new ReadableStream({
+    start(controller) {
+      for (const e of entries) {
+        const nameBytes = encoder.encode(e.name);
+        const data = e.data;
+        const crc = _zipCrc32(data), compSize = data.length;
+        const lh = new Uint8Array(30 + nameBytes.length);
+        _zipPut32(lh, 0, 0x04034b50); _zipPut16(lh, 4, 20); _zipPut16(lh, 6, 0x0800); _zipPut16(lh, 8, 0);
+        _zipPut32(lh, 14, crc); _zipPut32(lh, 18, compSize); _zipPut32(lh, 22, compSize);
+        _zipPut16(lh, 26, nameBytes.length); lh.set(nameBytes, 30);
+        controller.enqueue(lh);
+        controller.enqueue(data);
+        centralEntries.push({ nameBytes, crc, compSize, offset });
+        offset += lh.length + data.length;
+      }
+      let centralOffset = offset;
+      for (const ce of centralEntries) {
+        const ch = new Uint8Array(46 + ce.nameBytes.length);
+        _zipPut32(ch, 0, 0x02014b50); _zipPut16(ch, 4, 20); _zipPut16(ch, 6, 20); _zipPut16(ch, 8, 0x0800);
+        _zipPut16(ch, 10, 0); _zipPut32(ch, 16, ce.crc); _zipPut32(ch, 20, ce.compSize);
+        _zipPut32(ch, 24, ce.compSize); _zipPut16(ch, 28, ce.nameBytes.length);
+        _zipPut32(ch, 42, ce.offset); ch.set(ce.nameBytes, 46);
+        controller.enqueue(ch);
+        offset += ch.length;
+      }
+      const totalCentralSize = offset - centralOffset;
+      const eocd = new Uint8Array(22);
+      _zipPut32(eocd, 0, 0x06054b50); _zipPut16(eocd, 8, centralEntries.length);
+      _zipPut16(eocd, 10, centralEntries.length); _zipPut32(eocd, 12, totalCentralSize);
+      _zipPut32(eocd, 16, centralOffset);
+      controller.enqueue(eocd);
+      controller.close();
+    }
+  });
+  return new Response(stream).blob();
 }
 
 // 图片批量打包到 ZIP（异步 fetch 图片 → 添加到 entries 数组），
@@ -3423,7 +3437,11 @@ async function _batchFetchImagesToZip(imgs, zipEntries, batchSize = 10, seenName
         const blob = await res.blob();
         const imgMaxKB = settings.imgMaxKB || 0;
         if (imgMaxKB > 0 && blob.size > imgMaxKB * 1024) {
-          state.interruptExport = true; state.interruptReason = 'imgSize'; state.interruptMsgId = img.msgId || 0;
+          state.interruptExport = true; state.interruptReason = 'imgSize';
+          // 记录 msgId 最小的那张超大图（并行 fetch 时多张同时超限，只取第一张）
+          if (!state.interruptMsgId || img.msgId < state.interruptMsgId) {
+            state.interruptMsgId = img.msgId || 0;
+          }
           return false;
         }
         const ab = await blob.arrayBuffer();
@@ -5275,7 +5293,7 @@ async function exportAvatarsImpl() {
   }
   if (zipEntries && zipEntries.length > 0) {
     const zipName = `avatars_${new Date().toISOString().slice(0, 10)}.zip`;
-    downloadZipBlob(createZipBlob(zipEntries), zipName);
+    downloadZipBlob(await createZipBlob(zipEntries), zipName);
   }
   showToast(t('t.avatarExportDone', {count: written, skipped}), 'success');
 }
