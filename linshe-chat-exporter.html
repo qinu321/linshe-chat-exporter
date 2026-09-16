@@ -5,34 +5,36 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title data-i18n="ui.pageTitle">邻舍 · 聊天记录导出器</title>
 <style>
-/* ── Theme Variables ── */
-/* 浅色（默认，与附件版本原配色完全一致） */
+/* ═══════════════════════════════════════════════
+   Theme Variables & Design Tokens
+   ═══════════════════════════════════════════════ */
+/* 浅色（默认） */
 :root {
-  --bg-app: #f5f6fa;            /* body 页面背景 */
+  --bg-app: #f1f4f9;            /* body 页面背景 */
   --bg-soft: #f8fafc;           /* 内容区 / 输入框 / 说明条 */
-  --bg-subtle: #fafbfc;         /* 标签页 / 已选中栏 */
-  --bg-hover: #f1f5f9;          /* 悬停背景 / 设置面板 */
+  --bg-subtle: #f1f5f9;         /* 标签页 / 已选中栏 */
+  --bg-hover: #eef2f6;          /* 悬停背景 / 设置面板 */
   --bg-surface: #ffffff;        /* 卡片 / 头部 / 侧边栏 / 按钮 */
   --on-accent: #ffffff;         /* 彩色按钮 / 头像上的白色文字 */
-  --text-base: #2c3e50;         /* body 主文字 */
-  --text-strong: #334155;       /* 标题 / 正文 / 输入框文字 */
+  --text-base: #334155;         /* body 主文字 */
+  --text-strong: #1e293b;       /* 标题 / 正文 / 输入框文字 */
   --text-mid: #475569;          /* 次级文字 / 按钮文字 */
   --text-sub: #64748b;          /* 状态文字 / 弱化文字 */
   --text-muted: #94a3b8;        /* 弱文字 / 时间 / 提示 */
   --text-faint: #cbd5e1;        /* 更弱文字 / 悬停边框 */
-  --text-heading: #1e293b;      /* 设置面板标题 */
-  --border: #e8ecf1;            /* 常规边框 */
-  --border-strong: #e2e8f0;     /* 输入框 / 卡片边框 */
+  --text-heading: #0f172a;      /* 设置面板标题 */
+  --border: #e2e8f0;            /* 常规边框 */
+  --border-strong: #d1d9e8;     /* 输入框 / 卡片边框 */
   --accent: #d63050;            /* 主题红 */
   --accent-hover: #c02840;      /* 主题红悬停 */
-  --accent-hover2: #c02b47;     /* 主题红悬停（保存按钮） */
+  --accent-hover2: #b8223d;     /* 主题红悬停（保存按钮） */
   --accent-bg: #fef2f6;         /* 选中消息背景 */
   --accent-bg-soft: #fdf2f4;    /* 选中项 / radio 悬停 */
   --accent-border-soft: #f4a3b4;/* radio 悬停边框 */
   --accent-outline: #f9a8b8;    /* 选中消息描边 */
   --green: #16a34a;             /* 成功绿 */
   --green-hover: #15803d;       /* 成功绿悬停 */
-  --green-bg: #e8faf0;          /* 在线状态背景 */
+  --green-bg: #ecfdf5;          /* 在线状态背景 */
   --green-disabled-bg: #dcfce7;
   --green-disabled-border: #bbf7d0;
   --green-disabled-text: #86efac;
@@ -47,50 +49,62 @@
   --indigo-bg: #eef2ff;         /* 群聊标签背景 */
   --amber: #f59e0b;             /* 琥珀（跳转高亮） */
   --amber-bg: #fffbeb;          /* 跳转高亮背景 */
-  --scrollbar: #d1d5db;         /* 滚动条 */
+  --scrollbar: #cbd5e1;         /* 滚动条 */
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.04), 0 1px 4px rgba(0,0,0,0.03);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.05), 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,0.06), 0 2px 6px rgba(0,0,0,0.04);
+  --radius-sm: 6px;
+  --radius-md: 10px;
+  --radius-lg: 14px;
+  --radius-xl: 18px;
+  --transition-fast: 0.12s ease;
+  --transition-normal: 0.2s ease;
 }
-/* 深色（全部使用真实亮色值，不互相引用，保证文字对比度） */
+/* 深色 */
 [data-theme="dark"] {
-  --bg-app: #0f172a;
-  --bg-soft: #1e293b;
-  --bg-subtle: #16233a;
-  --bg-hover: #243247;
-  --bg-surface: #1a2437;
+  --bg-app: #0a1124;
+  --bg-soft: #131e33;
+  --bg-subtle: #111b2e;
+  --bg-hover: #1a2740;
+  --bg-surface: #14203a;
   --on-accent: #ffffff;
-  --text-base: #e2e8f0;
-  --text-strong: #f1f5f9;
-  --text-mid: #cbd5e1;
+  --text-base: #d1d9e8;
+  --text-strong: #e8edf5;
+  --text-mid: #b0bedb;
   --text-sub: #94a3b8;
-  --text-muted: #a3b3c8;
-  --text-faint: #64748b;
-  --text-heading: #f8fafc;
-  --border: #2d3c52;
-  --border-strong: #3a4a63;
+  --text-muted: #7a8aa8;
+  --text-faint: #5a6a88;
+  --text-heading: #f1f5f9;
+  --border: #1e3050;
+  --border-strong: #2a4062;
   --accent: #f25c7a;
   --accent-hover: #ff7d97;
   --accent-hover2: #ff6f8a;
-  --accent-bg: #3b1d26;
-  --accent-bg-soft: #2c1a1f;
-  --accent-border-soft: #8a4253;
+  --accent-bg: #2d1520;
+  --accent-bg-soft: #24151c;
+  --accent-border-soft: #7a3d4f;
   --accent-outline: #f25c7a;
   --green: #4ade80;
   --green-hover: #22c55e;
-  --green-bg: #123524;
-  --green-disabled-bg: #1d3a2c;
-  --green-disabled-border: #2f5c45;
-  --green-disabled-text: #4a7a63;
+  --green-bg: #0f2a1a;
+  --green-disabled-bg: #142e20;
+  --green-disabled-border: #1f4a33;
+  --green-disabled-text: #3a6b55;
   --red: #f87171;
   --red-hover: #fca5a5;
-  --red-bg: #3a1a1a;
-  --red-disabled-bg: #3d1f1f;
-  --red-disabled-border: #6b3333;
-  --red-disabled-text: #a46868;
+  --red-bg: #2e1414;
+  --red-disabled-bg: #361c1c;
+  --red-disabled-border: #5a2e2e;
+  --red-disabled-text: #8f5a5a;
   --blue: #60a5fa;
   --indigo: #818cf8;
-  --indigo-bg: #262e55;
+  --indigo-bg: #1c2250;
   --amber: #fbbf24;
-  --amber-bg: #35290f;
-  --scrollbar: #475569;
+  --amber-bg: #2a2008;
+  --scrollbar: #3a4a63;
+  --shadow-sm: 0 1px 2px rgba(0,0,0,0.15);
+  --shadow-md: 0 2px 8px rgba(0,0,0,0.2);
+  --shadow-lg: 0 4px 16px rgba(0,0,0,0.25);
 }
 
 /* ── Reset & Base ── */
@@ -103,26 +117,53 @@ body {
   display: flex;
   flex-direction: column;
   overflow: hidden;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* ── Daytime Header ── */
+/* ── SVG Icon Base ── */
+.icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  flex-shrink: 0;
+  color: currentColor;
+  stroke-width: 2;
+  stroke: currentColor;
+  fill: none;
+  vertical-align: middle;
+}
+.icon-sm { width: 14px; height: 14px; stroke-width: 1.8; }
+.icon-lg { width: 22px; height: 22px; }
+.icon-xl { width: 28px; height: 28px; }
+
+/* ── Header ── */
 .header {
   display: flex;
   align-items: center;
-  gap: 12px;
+  gap: 10px;
   padding: 10px 20px;
   background: var(--bg-surface);
   border-bottom: 1px solid var(--border);
   flex-shrink: 0;
   z-index: 10;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  box-shadow: var(--shadow-sm);
 }
-.header h1 { font-size: 17px; font-weight: 600; color: var(--accent); white-space: nowrap; letter-spacing: 0.3px; }
+.header h1 {
+  font-size: 16px; font-weight: 700; color: var(--accent);
+  white-space: nowrap; letter-spacing: -0.2px;
+  display: flex; align-items: center; gap: 8px;
+}
+.header .header-icon { color: var(--accent); width: 22px; height: 22px; }
 .header .subtitle { font-size: 13px; color: var(--text-muted); margin-left: 4px; flex: 1; }
 .header .status {
-  font-size: 12px; padding: 4px 12px; border-radius: 12px;
+  font-size: 12px; padding: 3px 12px 3px 10px; border-radius: 20px;
   background: var(--bg-hover); color: var(--text-sub); font-weight: 500;
+  display: inline-flex; align-items: center; gap: 4px;
 }
+.header .status .icon { width: 12px; height: 12px; }
 .header .status.online { background: var(--green-bg); color: var(--green); }
 .header .status.error { background: var(--red-bg); color: var(--red-hover); }
 
@@ -142,35 +183,46 @@ body {
 .sidebar-tab {
   flex: 1; padding: 10px 0; text-align: center; font-size: 13px;
   cursor: pointer; color: var(--text-muted); border-bottom: 2px solid transparent;
-  transition: all 0.2s; user-select: none; font-weight: 500;
+  transition: all var(--transition-fast); user-select: none; font-weight: 500;
+  display: flex; align-items: center; justify-content: center; gap: 5px;
 }
 .sidebar-tab:hover { color: var(--text-sub); background: var(--bg-hover); }
 .sidebar-tab.active { color: var(--accent); border-bottom-color: var(--accent); background: var(--bg-surface); }
+.sidebar-tab .icon { width: 16px; height: 16px; }
 .sidebar-search { padding: 8px 10px; flex-shrink: 0; }
 .sidebar-search input {
-  width: 100%; padding: 7px 10px; border-radius: 8px;
+  width: 100%; padding: 8px 12px; border-radius: var(--radius-sm);
   border: 1px solid var(--border-strong); background: var(--bg-soft); color: var(--text-strong);
-  font-size: 13px; outline: none; transition: border 0.2s;
+  font-size: 13px; outline: none; transition: all var(--transition-fast);
 }
-.sidebar-search input:focus { border-color: var(--accent); background: var(--bg-surface); }
+.sidebar-search input:focus { border-color: var(--accent); background: var(--bg-surface); box-shadow: 0 0 0 3px rgba(214,48,80,0.1); }
 .sidebar-search input::placeholder { color: var(--text-muted); }
 .sidebar-list { flex: 1; overflow-y: auto; padding: 4px 0; }
 .sidebar-list::-webkit-scrollbar { width: 4px; }
 .sidebar-list::-webkit-scrollbar-thumb { background: var(--scrollbar); border-radius: 2px; }
+.sidebar-list::-webkit-scrollbar-track { background: transparent; }
 
 /* ── Chat Item in Sidebar ── */
 .chat-item {
   display: flex; align-items: center; gap: 10px;
   padding: 10px 14px; cursor: pointer;
-  border-left: 3px solid transparent; transition: all 0.12s;
+  border-left: 3px solid transparent; transition: all var(--transition-fast);
+  position: relative;
 }
+.chat-item::after {
+  content: '';
+  position: absolute; left: 14px; right: 14px; bottom: 0;
+  height: 1px; background: var(--border); opacity: 0.5;
+}
+.chat-item:last-child::after { display: none; }
 .chat-item:hover { background: var(--bg-soft); }
 .chat-item.active { background: var(--accent-bg); border-left-color: var(--accent); }
+.chat-item.active::after { opacity: 0; }
 .chat-item .avatar-placeholder {
   width: 36px; height: 36px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: 14px; font-weight: 600; color: var(--on-accent); flex-shrink: 0;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  box-shadow: var(--shadow-sm);
 }
 .chat-item .info { flex: 1; min-width: 0; }
 .chat-item .info .name {
@@ -211,41 +263,42 @@ body {
 .toolbar .export-from-label { font-size: 12px; color: var(--text-muted); white-space: nowrap; }
 .toolbar .export-from-input {
   width: 90px; padding: 5px 8px; border: 1px solid var(--border-strong);
-  border-radius: 8px; background: var(--bg-surface); color: var(--text-mid);
-  font-size: 13px; text-align: right;
+  border-radius: var(--radius-sm); background: var(--bg-surface); color: var(--text-mid);
+  font-size: 13px; text-align: right; outline: none; transition: all var(--transition-fast);
 }
-.toolbar .export-from-input:focus { outline: none; border-color: var(--accent); }
+.toolbar .export-from-input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(214,48,80,0.1); }
 .btn {
-  padding: 6px 14px; border: 1px solid var(--border-strong); border-radius: 8px;
+  display: inline-flex; align-items: center; gap: 5px;
+  padding: 6px 14px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
   background: var(--bg-surface); color: var(--text-mid); font-size: 13px;
-  cursor: pointer; transition: all 0.15s; white-space: nowrap; font-weight: 500;
+  cursor: pointer; transition: all var(--transition-fast); white-space: nowrap; font-weight: 500;
+  line-height: 1.4;
 }
 .btn:hover { background: var(--bg-hover); border-color: var(--text-faint); }
 .btn:active { transform: scale(0.97); }
-/* 通用禁用样式（普通 .btn 无变体类时也生效；.btn-success/.btn-danger 的专属 :disabled 规则
-   在下方更靠后，优先级相同按顺序覆盖，保持各自的禁用配色） */
-.btn:disabled { background: var(--bg-surface); border-color: var(--border-strong); color: var(--text-faint); cursor: not-allowed; }
-.btn:disabled:hover { background: var(--bg-surface); border-color: var(--border-strong); color: var(--text-faint); cursor: not-allowed; }
+.btn .icon { width: 16px; height: 16px; }
+.btn:disabled { opacity: 0.5; cursor: not-allowed; }
+.btn:disabled:hover { opacity: 0.5; background: var(--bg-surface); border-color: var(--border-strong); }
 .btn:disabled:active { transform: none; }
 .btn-primary { background: var(--accent); color: var(--on-accent); border-color: var(--accent); }
 .btn-primary:hover { background: var(--accent-hover); }
 .btn-success { background: var(--green); color: var(--on-accent); border-color: var(--green); }
 .btn-success:hover { background: var(--green-hover); }
-.btn-success:disabled { background: var(--green-disabled-bg); border-color: var(--green-disabled-border); color: var(--green-disabled-text); cursor: not-allowed; }
+.btn-success:disabled { background: var(--green-disabled-bg); border-color: var(--green-disabled-border); color: var(--green-disabled-text); }
 .btn-danger { background: var(--red); color: var(--on-accent); border-color: var(--red); }
 .btn-danger:hover { background: var(--red-hover); }
-.btn-danger:disabled { background: var(--red-disabled-bg); border-color: var(--red-disabled-border); color: var(--red-disabled-text); cursor: not-allowed; }
+.btn-danger:disabled { background: var(--red-disabled-bg); border-color: var(--red-disabled-border); color: var(--red-disabled-text); }
 
 /* ── Jump Context Button ── */
 .btn-jump-context {
-  display: inline-flex; align-items: center; gap: 3px;
-  padding: 3px 10px; border: 1px solid var(--accent); border-radius: 12px;
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 3px 10px; border: 1px solid var(--accent); border-radius: 20px;
   background: var(--bg-surface); color: var(--accent); font-size: 11px; font-weight: 500;
-  cursor: pointer; transition: all 0.15s; white-space: nowrap;
+  cursor: pointer; transition: all var(--transition-fast); white-space: nowrap;
   margin-left: 6px; flex-shrink: 0;
 }
 .btn-jump-context:hover { background: var(--accent); color: var(--on-accent); }
-.btn-jump-context .icon { font-size: 12px; }
+.btn-jump-context .icon { width: 12px; height: 12px; }
 
 /* ── Search Bar ── */
 .search-bar {
@@ -254,22 +307,23 @@ body {
   border-bottom: 1px solid var(--border); flex-shrink: 0;
 }
 .search-bar input {
-  flex: 1; padding: 7px 12px; border-radius: 8px;
+  flex: 1; padding: 8px 12px; border-radius: var(--radius-sm);
   border: 1px solid var(--border-strong); background: var(--bg-soft); color: var(--text-strong);
-  font-size: 13px; outline: none; transition: border 0.2s;
+  font-size: 13px; outline: none; transition: all var(--transition-fast);
 }
-.search-bar input:focus { border-color: var(--accent); background: var(--bg-surface); }
+.search-bar input:focus { border-color: var(--accent); background: var(--bg-surface); box-shadow: 0 0 0 3px rgba(214,48,80,0.1); }
 .search-bar input::placeholder { color: var(--text-muted); }
 .search-bar .search-hint {
   font-size: 12px; color: var(--text-muted); white-space: nowrap; font-weight: 500;
 }
 .search-bar .search-hint.has-results { color: var(--green); }
 .search-bar .btn-clear-search {
-  font-size: 11px; padding: 4px 10px; border: 1px solid var(--border-strong); border-radius: 6px;
+  font-size: 11px; padding: 4px 10px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
   background: var(--bg-surface); color: var(--text-muted); cursor: pointer; white-space: nowrap; font-weight: 500;
-  transition: all 0.15s;
+  transition: all var(--transition-fast); display: inline-flex; align-items: center; gap: 3px;
 }
 .search-bar .btn-clear-search:hover { background: var(--red-bg); color: var(--red); border-color: var(--red-disabled-border); }
+.search-bar .btn-clear-search .icon { width: 12px; height: 12px; }
 
 /* ── Message List ── */
 .message-list {
@@ -292,9 +346,9 @@ body {
 .pagination-bar .page-info .highlight { color: var(--accent); font-weight: 600; }
 .pagination-bar .page-btn {
   min-width: 32px; height: 28px; padding: 0 6px;
-  border: 1px solid var(--border-strong); border-radius: 6px;
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
   background: var(--bg-surface); color: var(--text-mid); font-size: 12px; font-weight: 500;
-  cursor: pointer; transition: all 0.12s; display: flex;
+  cursor: pointer; transition: all var(--transition-fast); display: flex;
   align-items: center; justify-content: center;
 }
 .pagination-bar .page-btn:hover { background: var(--bg-hover); border-color: var(--text-faint); }
@@ -310,12 +364,12 @@ body {
 }
 .pagination-bar .page-jump input {
   width: 42px; height: 28px; padding: 0 4px; text-align: center;
-  border: 1px solid var(--border-strong); border-radius: 6px;
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
   background: var(--bg-surface); color: var(--text-strong); font-size: 12px; outline: none;
 }
-.pagination-bar .page-jump input:focus { border-color: var(--accent); }
+.pagination-bar .page-jump input:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(214,48,80,0.1); }
 .pagination-bar .page-jump .go-btn {
-  padding: 0 10px; height: 28px; border: 1px solid var(--border-strong); border-radius: 6px;
+  padding: 0 10px; height: 28px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
   background: var(--bg-surface); color: var(--text-mid); font-size: 12px; cursor: pointer; font-weight: 500;
 }
 .pagination-bar .page-jump .go-btn:hover { background: var(--bg-hover); }
@@ -327,7 +381,7 @@ body {
 /* ── Message Item ── */
 .msg {
   display: flex; gap: 10px; padding: 8px 14px;
-  border-radius: 10px; transition: background 0.12s;
+  border-radius: var(--radius-md); transition: background var(--transition-fast);
   position: relative; align-items: flex-start;
 }
 .msg:hover { background: var(--bg-hover); }
@@ -353,7 +407,7 @@ body {
   display: flex; align-items: center; justify-content: center;
   font-size: 14px; font-weight: 600; color: var(--on-accent); margin-top: 2px;
   background-size: cover; background-position: center;
-  box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+  box-shadow: var(--shadow-sm);
 }
 .msg .msg-body { flex: 1; min-width: 0; }
 .msg .msg-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 3px; flex-wrap: wrap; }
@@ -380,34 +434,29 @@ body {
 }
 .msg .msg-images .img-preview {
   width: 200px; height: 150px; object-fit: contain; background: var(--bg-hover);
-  border-radius: 8px; display: block; cursor: pointer;
-  border: 1px solid var(--border); box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  /* 固定占位尺寸：图片加载前后布局完全一致，避免无缝滚动时高度突变导致滑杆跳动 */
-  /* 图片与消息内容竖直对齐：左移 16px(选框)+6px(gap)=22px，使图片回到 msg-body 起始处（与正文对齐） */
+  border-radius: var(--radius-sm); display: block; cursor: pointer;
+  border: 1px solid var(--border); box-shadow: var(--shadow-sm);
   margin-left: -22px;
 }
 .msg .msg-images .img-checkbox {
   flex-shrink: 0; margin-top: 0; width: 16px; height: 16px;
   accent-color: var(--accent); cursor: pointer; opacity: 0.3; transition: opacity 0.2s;
-  /* 与消息选框竖直对齐：普通消息左移 16px(选框)+10px(gap)+34px(头像)+10px(gap)=70px；
-     margin-right 对称补偿，使图片占位宽度不变 */
   margin-left: -70px; margin-right: 70px;
 }
 .msg.user-msg .msg-images .img-checkbox {
-  /* 用户消息头像在右侧(order:2)，body 前只有 16px 选框+10px gap=26px */
   margin-left: -26px; margin-right: 26px;
 }
 .msg:hover .img-checkbox { opacity: 1; }
 .msg.selected .img-checkbox { opacity: 1; }
 .msg .msg-id { font-size: 10px; color: var(--text-faint); margin-top: 2px; }
 
-/* ── User Message Right-aligned (like chat UI) ── */
+/* ── User Message Right-aligned ── */
 .msg.user-msg { flex-direction: row; }
 .msg.user-msg .msg-avatar { order: 2; }
 .msg.user-msg .msg-body { text-align: right; }
 .msg.user-msg .msg-meta { justify-content: flex-end; }
 
-/* ── Consecutive Same-Speaker: hide avatar, name & time ── */
+/* ── Consecutive Same-Speaker ── */
 .msg.no-avatar .msg-avatar { visibility: hidden; }
 .msg.no-avatar .msg-role { display: none; }
 .msg.no-avatar .msg-speaker { display: none; }
@@ -422,10 +471,9 @@ body {
   content: ''; display: inline-block; width: 32px; height: 1px;
   background: var(--border-strong); vertical-align: middle; margin: 0 8px;
 }
-/* 时间分割线（同一天内，带选框） */
 .time-divider-gap {
-  display: flex; align-items: center; justify-content: center; gap: 10px; border-radius: 10px; 
-  padding: 8px 14px; transition: background 0.12s;
+  display: flex; align-items: center; justify-content: center; gap: 10px; border-radius: var(--radius-md); 
+  padding: 8px 14px; transition: background var(--transition-fast);
 }
 .time-divider-gap:hover { background: var(--bg-hover); }
 .time-divider-gap .td-checkbox {
@@ -441,7 +489,6 @@ body {
   outline-offset: -1px;
   animation: pulse-glow 2s ease-in-out 1;
 }
-
 .time-divider-gap .td-line-left {
   display: inline-block; width: 32px; height: 1px;
   background: var(--border-strong); vertical-align: middle;
@@ -461,30 +508,30 @@ body {
 .toast {
   position: fixed; bottom: 30px; left: 50%;
   transform: translateX(-50%) translateY(80px);
-  padding: 10px 24px; border-radius: 10px; font-size: 14px;
-  color: var(--on-accent); opacity: 0; transition: all 0.3s ease;
+  padding: 10px 24px; border-radius: var(--radius-md); font-size: 14px;
+  color: var(--on-accent); opacity: 0; transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
   z-index: 999; pointer-events: none; font-weight: 500;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+  box-shadow: var(--shadow-lg);
+  display: inline-flex; align-items: center; gap: 8px;
 }
 .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
 .toast.success { background: var(--green); }
 .toast.error { background: var(--red); }
 .toast.info { background: var(--indigo); }
 
-/* ── 批量导出遮罩（导出数量 > 10 时显示，阻止导出期间操作页面） ──
-    动画参考 uiverse.io/Li-Deheng/bright-firefox-37（亮色点阵波浪 loader）：
-    外圈脉动 + 内点缩放 + 扩散波，5 个点错开 0.3s 形成波浪 */
+/* ── Export Overlay ── */
 #exportOverlay {
   position: fixed; inset: 0; z-index: 9999;
   display: none; align-items: center; justify-content: center;
   flex-direction: column; gap: 28px;
-  background: rgba(15, 23, 42, 0.55);   /* 浅色模式：半透明黑 */
-  --ef-color: hsl(0, 0%, 87%);           /* 亮色加载点（bright-firefox 风格） */
+  background: rgba(15, 23, 42, 0.6);
+  backdrop-filter: blur(4px);
+  --ef-color: hsl(0, 0%, 87%);
 }
 #exportOverlay.show { display: flex; }
 [data-theme="dark"] #exportOverlay {
-  background: rgba(255, 255, 255, 0.55); /* 深色模式：半透明白 */
-  --ef-color: hsl(0, 0%, 22%);           /* 暗色加载点 */
+  background: rgba(0, 0, 0, 0.7);
+  --ef-color: hsl(0, 0%, 30%);
 }
 #exportOverlay .export-loader {
   display: flex; justify-content: center; align-items: center;
@@ -555,7 +602,7 @@ body {
   align-items: center; justify-content: center;
   color: var(--text-muted); gap: 12px;
 }
-.empty-state .icon { font-size: 48px; opacity: 0.4; }
+.empty-state .icon { width: 48px; height: 48px; opacity: 0.4; }
 .empty-state .text { font-size: 14px; }
 
 /* ── Loading ── */
@@ -590,56 +637,59 @@ body {
 
 /* ── Settings Panel ── */
 .settings-panel {
-  flex: 1; overflow-y: auto; padding: 28px 32px; background: var(--bg-hover);
+  flex: 1; overflow-y: auto; padding: 32px 36px;
+  background: var(--bg-app);
 }
 .settings-panel h2 {
-  font-size: 18px; font-weight: 700; color: var(--text-heading); margin-bottom: 4px;
-  display: flex; align-items: center; gap: 8px;
+  font-size: 20px; font-weight: 700; color: var(--text-heading); margin-bottom: 4px;
+  display: flex; align-items: center; gap: 10px;
 }
-.settings-subtitle { font-size: 12px; color: var(--text-muted); margin-bottom: 20px; }
+.settings-panel h2 .icon { width: 22px; height: 22px; color: var(--accent); }
+.settings-subtitle { font-size: 13px; color: var(--text-muted); margin-bottom: 24px; }
 .settings-card {
-  background: var(--bg-surface); border: 1px solid var(--border-strong); border-radius: 14px;
-  padding: 22px 24px; margin-bottom: 18px; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+  background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--radius-lg);
+  padding: 24px 28px; margin-bottom: 20px;
+  box-shadow: var(--shadow-sm);
+  transition: box-shadow var(--transition-normal);
 }
+.settings-card:hover { box-shadow: var(--shadow-md); }
 .settings-card h3 {
-  font-size: 13px; font-weight: 600; color: var(--accent); letter-spacing: 0.4px;
-  text-transform: uppercase; margin-bottom: 16px; padding-bottom: 10px;
-  border-bottom: 1px solid var(--bg-hover);
+  font-size: 13px; font-weight: 700; color: var(--accent); letter-spacing: 0.4px;
+  text-transform: uppercase; margin-bottom: 16px; padding-bottom: 12px;
+  border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 8px;
 }
-.setting-row { margin-bottom: 16px; }
+.settings-card h3 .icon { width: 16px; height: 16px; }
+.setting-row { margin-bottom: 18px; }
 .setting-row:last-child { margin-bottom: 0; }
 .setting-row > label {
   display: block; font-size: 13px; font-weight: 600; color: var(--text-strong); margin-bottom: 7px;
 }
 .setting-row input[type="text"], .setting-row input[type="number"], .setting-row select {
-  width: 100%; max-width: 480px; padding: 8px 12px; border-radius: 8px;
+  width: 100%; max-width: 480px; padding: 8px 12px; border-radius: var(--radius-sm);
   border: 1px solid var(--border-strong); background: var(--bg-surface); color: var(--text-strong);
-  font-size: 13px; outline: none; transition: border-color 0.2s, box-shadow 0.2s;
+  font-size: 13px; outline: none; transition: all var(--transition-fast);
 }
 .setting-row input[type="text"]:focus, .setting-row select:focus, .setting-row input[type="number"]:focus {
-  border-color: var(--accent); box-shadow: 0 0 0 3px rgba(214, 48, 80, 0.12);
+  border-color: var(--accent); box-shadow: 0 0 0 3px rgba(214, 48, 80, 0.1);
 }
 .setting-row select { width: auto; min-width: 140px; cursor: pointer; }
-.setting-row input[type="number"] {
-  -moz-appearance: textfield;
-}
+.setting-row input[type="number"] { -moz-appearance: textfield; }
 .setting-row input[type="number"]::-webkit-inner-spin-button,
-.setting-row input[type="number"]::-webkit-outer-spin-button {
-  -webkit-appearance: none; margin: 0;
-}
+.setting-row input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
 .input-inline-group { display: flex; align-items: center; gap: 8px; }
 .input-inline-group input[type="number"] { flex: 0 0 100px; }
 .input-inline-note { font-size: 13px; color: var(--text-muted); white-space: nowrap; }
 .setting-note {
   font-size: 12px; color: var(--text-muted); margin-top: 6px; line-height: 1.7;
-  background: var(--bg-soft); border-left: 3px solid var(--border-strong); padding: 6px 10px; border-radius: 0 6px 6px 0;
+  background: var(--bg-soft); border-left: 3px solid var(--border-strong);
+  padding: 8px 12px; border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
 }
 .radio-group { display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
 .radio-group label {
   font-size: 12.5px; color: var(--text-mid); cursor: pointer;
   display: inline-flex; align-items: center; gap: 5px;
   padding: 5px 12px; border: 1px solid var(--border-strong); border-radius: 999px;
-  background: var(--bg-surface); transition: all 0.15s; user-select: none;
+  background: var(--bg-surface); transition: all var(--transition-fast); user-select: none;
 }
 .radio-group label:hover { border-color: var(--accent-border-soft); background: var(--accent-bg-soft); }
 .radio-group input[type="radio"] { accent-color: var(--accent); margin: 0; }
@@ -647,36 +697,33 @@ body {
   border-color: var(--accent); background: var(--accent-bg-soft); color: var(--accent); font-weight: 600;
 }
 .setting-actions {
-  display: flex; gap: 10px; margin-top: 6px;
-  padding: 18px 24px; background: var(--bg-surface); border: 1px solid var(--border-strong);
-  border-radius: 14px; box-shadow: 0 1px 3px rgba(15, 23, 42, 0.05);
+  display: flex; gap: 10px; margin-top: 8px;
+  padding: 20px 28px; background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--radius-lg); box-shadow: var(--shadow-sm);
 }
-.setting-actions .btn {
-  padding: 9px 22px; border-radius: 9px; font-size: 13px; font-weight: 600;
-  border: 1px solid var(--border-strong); background: var(--bg-surface); color: var(--text-mid); cursor: pointer;
-  transition: all 0.15s;
-}
-.setting-actions .btn:hover { background: var(--bg-hover); }
-.setting-actions .btn-success {
-  background: var(--accent); border-color: var(--accent); color: var(--on-accent);
-}
-.setting-actions .btn-success:hover { background: var(--accent-hover2); }
 
-/* ── md 模板管理器 ── */
+/* ── MD Template Manager ── */
 .md-template-manager { width: 100%; display: flex; flex-direction: column; gap: 8px; margin-top: 4px; }
 .md-template-list { display: flex; flex-direction: column; gap: 4px; }
 .md-template-item {
-  display: flex; align-items: center; gap: 6px; padding: 5px 8px;
-  border: 1px solid var(--border-strong); border-radius: 8px; background: var(--bg-soft);
+  display: flex; align-items: center; gap: 6px; padding: 6px 10px;
+  border: 1px solid var(--border-strong); border-radius: var(--radius-sm); background: var(--bg-soft);
+  transition: all var(--transition-fast);
 }
 .md-template-item.active { border-color: var(--accent); background: var(--accent-bg-soft); }
 .md-template-item .md-template-radio { display: flex; align-items: center; cursor: pointer; }
-.md-template-item .md-template-name { flex: 1; font-size: 13px; font-weight: 600; cursor: pointer; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.md-template-item .md-template-btn {
-  padding: 2px 7px; font-size: 12px; border: 1px solid var(--border-strong);
-  border-radius: 6px; background: var(--bg-surface); color: var(--text-mid); cursor: pointer;
+.md-template-item .md-template-name {
+  flex: 1; font-size: 13px; font-weight: 600; cursor: pointer;
+  min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 }
-.md-template-item .md-template-btn:hover { background: var(--bg-hover); }
+.md-template-item .md-template-btn {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 3px 8px; font-size: 12px; border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm); background: var(--bg-surface); color: var(--text-mid); cursor: pointer;
+  transition: all var(--transition-fast);
+}
+.md-template-item .md-template-btn .icon { width: 12px; height: 12px; }
+.md-template-item .md-template-btn:hover { background: var(--bg-hover); border-color: var(--text-faint); }
 .md-template-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 .md-template-actions .btn { padding: 6px 14px; font-size: 12px; }
 .md-template-edit { display: flex; flex-direction: column; gap: 6px; }
@@ -684,17 +731,19 @@ body {
 .md-template-edit-row label { width: auto; font-size: 12px; color: var(--text-mid); }
 .md-template-edit-row input { flex: 1; }
 #mdTemplateContent {
-  width: 100%; min-height: 150px; resize: vertical; font-family: ui-monospace, Consolas, monospace; font-size: 12px;
-  padding: 8px 10px; border: 1px solid var(--border-strong); border-radius: 8px;
-  background: var(--bg-surface); color: var(--text-strong); outline: none; box-sizing: border-box;
+  width: 100%; min-height: 150px; resize: vertical;
+  font-family: ui-monospace, 'SF Mono', Consolas, monospace; font-size: 12px;
+  padding: 8px 10px; border: 1px solid var(--border-strong); border-radius: var(--radius-sm);
+  background: var(--bg-surface); color: var(--text-strong); outline: none;
+  transition: border-color var(--transition-fast);
 }
 #mdTemplateContent:focus { border-color: var(--accent); }
 .md-var-btns { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
-/* 模板编辑区（.md-template-edit）按钮与上方 textarea 的间距已由其 column gap 提供，避免重复 */
 .md-template-edit .md-var-btns { margin-top: 0; }
 .md-var-btns .var-btn {
-  padding: 2px 9px; font-size: 11px; border: 1px solid var(--border-strong); border-radius: 6px;
-  background: var(--bg-subtle); color: var(--text-mid); cursor: pointer; transition: all 0.12s;
+  padding: 2px 9px; font-size: 11px; border: 1px solid var(--border-strong);
+  border-radius: var(--radius-sm); background: var(--bg-subtle); color: var(--text-mid);
+  cursor: pointer; transition: all var(--transition-fast);
 }
 .md-var-btns .var-btn:hover { border-color: var(--accent); color: var(--accent); background: var(--accent-bg-soft); }
 
@@ -702,27 +751,74 @@ body {
 @media (max-width: 700px) {
   .sidebar { width: 180px; min-width: 180px; }
   .header h1 { font-size: 15px; }
+  .header .subtitle { display: none; }
   .toolbar { padding: 6px 10px; }
   .select-all-bar { padding: 6px 10px; }
   .msg { padding: 4px 8px; }
+  .pagination-bar .page-nums { display: none; }
+  .settings-panel { padding: 20px 16px; }
+}
+@media (max-width: 480px) {
+  .sidebar { width: 100%; min-width: 0; max-height: 200px; }
+  .main { flex-direction: column; }
+  .resize-handle { display: none; }
+  .header .status { font-size: 11px; padding: 2px 8px; }
 }
 </style>
 </head>
 <body>
+<!-- SVG Icon Sprite (Lucide-style) -->
+<svg aria-hidden="true" style="position:absolute;width:0;height:0;overflow:hidden" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <symbol id="icon-clipboard" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/><path d="M12 11h4"/><path d="M12 16h4"/><path d="M8 11h.01"/><path d="M8 16h.01"/></symbol>
+    <symbol id="icon-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/></symbol>
+    <symbol id="icon-check-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></symbol>
+    <symbol id="icon-x-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="15" y1="9" x2="9" y2="15"/><line x1="9" y1="9" x2="15" y2="15"/></symbol>
+    <symbol id="icon-message-circle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+    <symbol id="icon-users" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></symbol>
+    <symbol id="icon-settings" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 1v2"/><path d="M12 21v2"/><path d="M4.22 4.22l1.42 1.42"/><path d="M18.36 18.36l1.42 1.42"/><path d="M1 12h2"/><path d="M21 12h2"/><path d="M4.22 19.78l1.42-1.42"/><path d="M18.36 5.64l1.42-1.42"/></symbol>
+    <symbol id="icon-palette" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="13.5" cy="6.5" r=".5" fill="currentColor"/><circle cx="17.5" cy="10.5" r=".5" fill="currentColor"/><circle cx="8.5" cy="7.5" r=".5" fill="currentColor"/><circle cx="6.5" cy="12.5" r=".5" fill="currentColor"/><path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10q.36 0 .72-.02a2.5 2.5 0 0 0 2.28-2.75 2 2 0 0 1 1.05-2.23 2 2 0 0 0 .52-3.35A2 2 0 0 1 17 10.5a2 2 0 0 0 2-2C19 5.5 16 2 12 2z"/></symbol>
+    <symbol id="icon-link" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/><path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></symbol>
+    <symbol id="icon-image" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></symbol>
+    <symbol id="icon-message-square" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></symbol>
+    <symbol id="icon-file-text" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/><polyline points="10 9 9 9 8 9"/></symbol>
+    <symbol id="icon-download" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></symbol>
+    <symbol id="icon-upload" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></symbol>
+    <symbol id="icon-camera" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></symbol>
+    <symbol id="icon-save" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></symbol>
+    <symbol id="icon-refresh-ccw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><polyline points="23 20 23 14 17 14"/><path d="M20.49 9A9 9 0 0 0 5.64 5.64L1 10m22 4l-4.64 4.36A9 9 0 0 1 3.51 15"/></symbol>
+    <symbol id="icon-refresh-cw" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 4 23 10 17 10"/><polyline points="1 20 1 14 7 14"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></symbol>
+    <symbol id="icon-x" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></symbol>
+    <symbol id="icon-folder" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></symbol>
+    <symbol id="icon-plus" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></symbol>
+    <symbol id="icon-copy" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></symbol>
+    <symbol id="icon-file" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/></symbol>
+    <symbol id="icon-trash-2" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/><line x1="10" y1="11" x2="10" y2="17"/><line x1="14" y1="11" x2="14" y2="17"/></symbol>
+    <symbol id="icon-search" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></symbol>
+    <symbol id="icon-chevron-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></symbol>
+    <symbol id="icon-chevron-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></symbol>
+    <symbol id="icon-chevrons-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="11 17 6 12 11 7"/><polyline points="18 17 13 12 18 7"/></symbol>
+    <symbol id="icon-chevrons-right" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="13 17 18 12 13 7"/><polyline points="6 17 11 12 6 7"/></symbol>
+    <symbol id="icon-square" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"/></symbol>
+    <symbol id="icon-arrow-left" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></symbol>
+    <symbol id="icon-edit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></symbol>
+    <symbol id="icon-inbox" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="22 12 16 12 14 15 10 15 8 12 2 12"/><path d="M5.45 5.11L2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z"/></symbol>
+  </defs>
+</svg>
 
 <div class="header">
-  <h1 data-i18n="ui.headerTitle">📋 邻舍 · 聊天记录导出器</h1>
+  <h1><svg class="icon header-icon" aria-hidden="true"><use href="#icon-clipboard"/></svg><span data-i18n="ui.headerTitle">邻舍 · 聊天记录导出器</span></h1>
   <span class="subtitle" data-i18n="ui.subtitle">查看 &amp; 框选复制</span>
-  <span class="status" id="statusBadge">⚪ 检查连接中…</span>
+  <span class="status" id="statusBadge"><svg class="icon" aria-hidden="true"><use href="#icon-circle"/></svg><span data-i18n="ui.checkingConnection">检查连接中…</span></span>
 </div>
 
 <div class="main">
   <!-- Sidebar -->
   <div class="sidebar" id="sidebar">
     <div class="sidebar-tabs">
-      <div class="sidebar-tab active" data-tab="private" onclick="switchTab('private')">💬 <span data-i18n="tab.private">私聊</span></div>
-      <div class="sidebar-tab" data-tab="group" onclick="switchTab('group')">👥 <span data-i18n="tab.group">群聊</span></div>
-      <div class="sidebar-tab" data-tab="settings" onclick="switchTab('settings')">⚙️ <span data-i18n="tab.settings">设置</span></div>
+      <div class="sidebar-tab active" data-tab="private" onclick="switchTab('private')"><svg class="icon" aria-hidden="true"><use href="#icon-message-circle"/></svg><span data-i18n="tab.private">私聊</span></div>
+      <div class="sidebar-tab" data-tab="group" onclick="switchTab('group')"><svg class="icon" aria-hidden="true"><use href="#icon-users"/></svg><span data-i18n="tab.group">群聊</span></div>
+      <div class="sidebar-tab" data-tab="settings" onclick="switchTab('settings')"><svg class="icon" aria-hidden="true"><use href="#icon-settings"/></svg><span data-i18n="tab.settings">设置</span></div>
     </div>
     <div class="sidebar-search" id="sidebarSearch">
       <input type="text" id="searchInput" data-i18n="ui.searchPlaceholder" placeholder="搜索角色/群聊…" oninput="filterChats()">
@@ -736,11 +832,11 @@ body {
   <div class="content" id="content">
     <!-- Settings Panel -->
     <div class="settings-panel" id="settingsPanel" style="display:none;">
-      <h2 data-i18n="h.settings">⚙️ 设置</h2>
+      <h2><svg class="icon icon-lg" aria-hidden="true"><use href="#icon-settings"/></svg><span data-i18n="h.settings">设置</span></h2>
       <div class="settings-subtitle" data-i18n="h.subtitle">调整导出选项，保存后本地生效</div>
 
       <div class="settings-card">
-        <h3 data-i18n="s.appearance">🎨 外观</h3>
+        <h3><svg class="icon" aria-hidden="true"><use href="#icon-palette"/></svg><span data-i18n="s.appearance">外观</span></h3>
         <div class="setting-row">
           <label data-i18n="l.theme">外观：</label>
           <select id="setTheme" onchange="onSettingChange()">
@@ -760,11 +856,11 @@ body {
       </div>
 
       <div class="settings-card">
-        <h3 data-i18n="s.connection">🔗 连接</h3>
+        <h3><svg class="icon" aria-hidden="true"><use href="#icon-link"/></svg><span data-i18n="s.connection">连接</span></h3>
         <div class="setting-row">
           <label data-i18n="l.linsheUrl">邻舍网址：</label>
           <input type="text" id="setLinsheUrl" oninput="onSettingChange()">
-          <button type="button" class="btn" onclick="reconnect()" data-i18n-title="tt.reconnect" data-i18n="b.reconnect">🔄 重新连接</button>
+          <button type="button" class="btn" onclick="reconnect()" data-i18n-title="tt.reconnect"><svg class="icon" aria-hidden="true"><use href="#icon-refresh-cw"/></svg><span data-i18n="b.reconnect">重新连接</span></button>
           <div class="setting-note" data-i18n="n.linsheUrl">此处的值直接更改 API 网址（默认：http://localhost:3099）。修改后点击"重新连接"立即生效，无需刷新页面</div>
         </div>
         <div class="setting-row">
@@ -775,7 +871,7 @@ body {
       </div>
 
       <div class="settings-card">
-        <h3 data-i18n="s.imgLinks">🖼️ 图片链接</h3>
+        <h3><svg class="icon" aria-hidden="true"><use href="#icon-image"/></svg><span data-i18n="s.imgLinks">图片链接</span></h3>
         <div class="setting-row">
           <label data-i18n="l.facePrefix">头像外链时的前置链接：</label>
           <input type="text" id="setFacePrefix" oninput="onSettingChange()">
@@ -811,7 +907,7 @@ body {
       </div>
 
       <div class="settings-card">
-        <h3 data-i18n="s.exportFormat">💬 导出格式</h3>
+        <h3><svg class="icon" aria-hidden="true"><use href="#icon-message-square"/></svg><span data-i18n="s.exportFormat">导出格式</span></h3>
         <div class="setting-row">
           <label data-i18n="l.chatboxStyle">chatbox样式：</label>
           <div class="radio-group">
@@ -848,15 +944,15 @@ body {
       </div>
 
       <div class="settings-card">
-        <h3 data-i18n="s.mdTemplate">📄 md模板设置</h3>
+        <h3><svg class="icon" aria-hidden="true"><use href="#icon-file-text"/></svg><span data-i18n="s.mdTemplate">md模板设置</span></h3>
         <div class="setting-row">
           <label data-i18n="l.mdTemplateLabel">md模板（参考 Obsidian Web Clipper）：</label>
           <div class="md-template-manager">
             <div class="md-template-list" id="mdTemplateList"></div>
             <div class="md-template-actions">
-              <button type="button" class="btn" onclick="addMdTemplate()" data-i18n="b.newTemplate">＋ 新建模板</button>
-              <button type="button" class="btn" onclick="exportMdTemplate(mdTemplateEditingId)" data-i18n="b.exportTemplate">📤 导出当前模板</button>
-              <button type="button" class="btn" onclick="importMdTemplate(mdTemplateEditingId)" data-i18n="b.importTemplate">📥 导入当前模板</button>
+              <button type="button" class="btn" onclick="addMdTemplate()"><svg class="icon" aria-hidden="true"><use href="#icon-plus"/></svg><span data-i18n="b.newTemplate">新建模板</span></button>
+              <button type="button" class="btn" onclick="exportMdTemplate(mdTemplateEditingId)"><svg class="icon" aria-hidden="true"><use href="#icon-upload"/></svg><span data-i18n="b.exportTemplate">导出当前模板</span></button>
+              <button type="button" class="btn" onclick="importMdTemplate(mdTemplateEditingId)"><svg class="icon" aria-hidden="true"><use href="#icon-download"/></svg><span data-i18n="b.importTemplate">导入当前模板</span></button>
             </div>
             <div class="md-template-edit">
               <div class="md-template-edit-row">
@@ -884,7 +980,7 @@ body {
       </div>
 
       <div class="settings-card">
-        <h3 data-i18n="s.obsidian">📥 导入Obsidian设置</h3>
+        <h3><svg class="icon" aria-hidden="true"><use href="#icon-download"/></svg><span data-i18n="s.obsidian">导入Obsidian设置</span></h3>
         <div class="setting-row">
           <label data-i18n="l.mdDirectObsidian">md文件是否直接添加到Obsidian：</label>
           <div class="radio-group">
@@ -901,7 +997,7 @@ body {
         </div>
         <div class="setting-row">
           <label data-i18n="l.mdExportDir">md导出文件夹：</label>
-          <button type="button" class="btn" onclick="chooseExportDir('md')" data-i18n="b.chooseMdDir">📁 选择md导出文件夹</button>
+          <button type="button" class="btn" onclick="chooseExportDir('md')"><svg class="icon" aria-hidden="true"><use href="#icon-folder"/></svg><span data-i18n="b.chooseMdDir">选择md导出文件夹</span></button>
           <span id="mdExportDirLabel" class="setting-note" data-i18n="ui.notSet">未设置，导出时提示选择</span>
           <div class="setting-note" data-i18n="n.mdExportDir">预先指定 md 文件的导出位置（Chrome/Edge 支持）。未设置时，导出过程中会弹出"选择md导出文件夹"提示并让您选择；不支持选择文件夹的环境自动下载到浏览器默认下载文件夹</div>
         </div>
@@ -928,7 +1024,7 @@ body {
         </div>
         <div class="setting-row">
           <label data-i18n="l.imgExportDir">图片导出文件夹：</label>
-          <button type="button" class="btn" onclick="chooseExportDir('img')" data-i18n="b.chooseImgDir">📁 选择图片导出文件夹</button>
+          <button type="button" class="btn" onclick="chooseExportDir('img')"><svg class="icon" aria-hidden="true"><use href="#icon-folder"/></svg><span data-i18n="b.chooseImgDir">选择图片导出文件夹</span></button>
           <span id="imgExportDirLabel" class="setting-note" data-i18n="ui.notSet">未设置，导出时提示选择</span>
           <div class="setting-note" data-i18n="n.imgExportDir">预先指定图片的导出位置（Chrome/Edge 支持）。未设置时，导出过程中会弹出"选择图片导出文件夹"提示并让您选择；不支持选择文件夹的环境自动下载到浏览器默认下载文件夹</div>
         </div>
@@ -947,26 +1043,26 @@ body {
         </div>
         <div class="setting-row">
           <label data-i18n="l.emojiExportDir">表情包导出文件夹：</label>
-          <button type="button" class="btn" onclick="chooseExportDir('emoji')" data-i18n="b.chooseEmojiDir">📁 选择表情包导出文件夹</button>
+          <button type="button" class="btn" onclick="chooseExportDir('emoji')"><svg class="icon" aria-hidden="true"><use href="#icon-folder"/></svg><span data-i18n="b.chooseEmojiDir">选择表情包导出文件夹</span></button>
           <span id="emojiExportDirLabel" class="setting-note" data-i18n="ui.notSet">未设置，导出时提示选择</span>
           <div class="setting-note" data-i18n="n.emojiExportDir">功能同上</div>
         </div>
       </div>
 
       <div class="settings-card">
-        <h3 data-i18n="s.exportAvatars">📷 导出头像</h3>
+        <h3><svg class="icon" aria-hidden="true"><use href="#icon-camera"/></svg><span data-i18n="s.exportAvatars">导出头像</span></h3>
         <div class="setting-row">
-          <button type="button" class="btn" onclick="exportAvatars()" data-i18n="b.exportAvatars">📷 导出头像</button>
+          <button type="button" class="btn" onclick="exportAvatars()"><svg class="icon" aria-hidden="true"><use href="#icon-camera"/></svg><span data-i18n="b.exportAvatars">导出头像</span></button>
           <span id="avatarExportDirLabel" class="setting-note" data-i18n="ui.notSet">未设置，导出时提示选择</span>
         </div>
         <div class="setting-note" data-i18n="n.exportAvatars">一次性导出所有角色和用户的头像到指定文件夹里；不支持环境下自动下载到浏览器默认下载文件夹</div>
       </div>
 
       <div class="setting-actions">
-        <button class="btn btn-success" onclick="saveSettingsToStorage()" data-i18n="b.save">💾 保存</button>
-        <button class="btn" onclick="resetSettings()" data-i18n="b.reset">↺ 重置</button>
-        <button class="btn" onclick="exportSettings()" data-i18n="b.exportSettings">📤 导出设置</button>
-        <button class="btn" onclick="importSettings()" data-i18n="b.importSettings">📥 导入设置</button>
+        <button class="btn btn-success" onclick="saveSettingsToStorage()"><svg class="icon" aria-hidden="true"><use href="#icon-save"/></svg><span data-i18n="b.save">保存</span></button>
+        <button class="btn" onclick="resetSettings()"><svg class="icon" aria-hidden="true"><use href="#icon-refresh-ccw"/></svg><span data-i18n="b.reset">重置</span></button>
+        <button class="btn" onclick="exportSettings()"><svg class="icon" aria-hidden="true"><use href="#icon-upload"/></svg><span data-i18n="b.exportSettings">导出设置</span></button>
+        <button class="btn" onclick="importSettings()"><svg class="icon" aria-hidden="true"><use href="#icon-download"/></svg><span data-i18n="b.importSettings">导入设置</span></button>
       </div>
     </div>
 
@@ -976,14 +1072,14 @@ body {
       <span class="chat-type" id="chatType"></span>
       <span class="stats" id="stats"></span>
       <button class="btn btn-success" id="copyBtn" onclick="copySelected()" disabled>
-        <span id="copyBtnLabel">📋 复制选中</span>
+        <svg class="icon" aria-hidden="true"><use href="#icon-copy"/></svg><span id="copyBtnLabel">复制选中</span>
       </button>
-      <button class="btn" id="exportMdBtn" onclick="exportSelectedMd()" disabled data-i18n="b.exportMd">📄 导出md</button>
-      <button class="btn btn-danger" id="clearBtn" onclick="clearSelection()" disabled data-i18n="b.clear">✕ 清除</button>
+      <button class="btn" id="exportMdBtn" onclick="exportSelectedMd()" disabled><svg class="icon" aria-hidden="true"><use href="#icon-file-text"/></svg><span data-i18n="b.exportMd">导出md</span></button>
+      <button class="btn btn-danger" id="clearBtn" onclick="clearSelection()" disabled><svg class="icon" aria-hidden="true"><use href="#icon-x"/></svg><span data-i18n="b.clear">清除</span></button>
       <span class="export-from-group">
       <span class="export-from-label" data-i18n-title="tt.exportFromLabel" data-i18n="ui.exportFromLabel" onclick="jumpToExportId()" style="cursor:pointer">已导出到 ID:</span>
       <input type="text" id="exportFromIdInput" class="export-from-input" inputmode="numeric" pattern="[0-9]*" value="0" autocomplete="off" oninput="onExportFromIdInput()" onchange="onExportFromIdChange()" onkeydown="if(event.key==='Enter')jumpToExportId()">
-      <button class="btn" id="exportAllBtn" onclick="exportAllMd()" data-i18n="b.batchExport" data-i18n-title="ui.exportAllTitle">🗂 范围批量导出md</button>
+      <button class="btn" id="exportAllBtn" onclick="exportAllMd()"><svg class="icon" aria-hidden="true"><use href="#icon-folder"/></svg><span data-i18n="b.batchExport">范围批量导出md</span></button>
       <label style="display:inline-flex;align-items:center;gap:4px;font-size:13px;color:var(--text-sub);cursor:pointer;white-space:nowrap">
         <input type="checkbox" id="exportImagesOnlyCb" style="accent-color:var(--accent);margin:0;width:14px;height:14px">
         <span data-i18n="ui.imagesOnly">仅图片</span>
@@ -1015,12 +1111,12 @@ body {
 
     <!-- Pagination -->
     <div class="pagination-bar" id="paginationBar" style="display:none;">
-      <button class="page-btn" id="pageFirst" onclick="goPage(1)" data-i18n-title="tt.pageFirst" title="首页">«</button>
-      <button class="page-btn" id="pagePrev" onclick="goPage(state.currentPage - 1)" data-i18n-title="tt.pagePrev" title="上一页">‹</button>
+      <button class="page-btn" id="pageFirst" data-i18n-title="tt.pageFirst" title="首页"><svg class="icon icon-sm" aria-hidden="true"><use href="#icon-chevrons-left"/></svg></button>
+      <button class="page-btn" id="pagePrev" data-i18n-title="tt.pagePrev" title="上一页"><svg class="icon icon-sm" aria-hidden="true"><use href="#icon-chevron-left"/></svg></button>
       <div class="page-nums" id="pageNums"></div>
       <span class="page-info" id="pageInfo"></span>
-      <button class="page-btn" id="pageNext" onclick="goPage(state.currentPage + 1)" data-i18n-title="tt.pageNext" title="下一页">›</button>
-      <button class="page-btn" id="pageLast" onclick="goPage(state.totalPages)" data-i18n-title="tt.pageLast" title="末页">»</button>
+      <button class="page-btn" id="pageNext" data-i18n-title="tt.pageNext" title="下一页"><svg class="icon icon-sm" aria-hidden="true"><use href="#icon-chevron-right"/></svg></button>
+      <button class="page-btn" id="pageLast" data-i18n-title="tt.pageLast" title="末页"><svg class="icon icon-sm" aria-hidden="true"><use href="#icon-chevrons-right"/></svg></button>
       <div class="page-jump">
         <span style="font-size:12px;color:#94a3b8;" data-i18n="ui.pageJump">跳转</span>
         <input type="number" id="pageJumpInput" min="1" onkeydown="if(event.key==='Enter')jumpToPage()">
@@ -1043,7 +1139,7 @@ body {
     <div class="ef-circle"><div class="ef-dot"></div><div class="ef-outline"></div></div>
   </div>
   <div class="export-overlay-text" data-i18n="ui.exportOverlay">正在导出，请稍候…</div>
-  <button class="export-overlay-btn" onclick="onInterruptExport()" data-i18n="b.interruptExport">⏹ 中断导出</button>
+  <button class="export-overlay-btn" onclick="onInterruptExport()"><svg class="icon" aria-hidden="true"><use href="#icon-square"/></svg><span data-i18n="b.interruptExport">中断导出</span></button>
 </div>
 
 <script>
@@ -1098,36 +1194,36 @@ const DEFAULT_SETTINGS = {
 // ── 国际化（中英双语） ──
 const I18N = {
   zh: {
-    'h.settings':'⚙️ 设置','h.subtitle':'调整导出选项，保存后本地生效',
-    's.appearance':'🎨 外观','s.connection':'🔗 连接','s.imgLinks':'🖼️ 图片链接','s.exportFormat':'💬 导出格式','s.mdTemplate':'📄 md模板设置','s.obsidian':'📥 导入Obsidian设置','s.exportAvatars':'📷 导出头像',
-    'l.theme':'外观：','l.language':'系统语言：','l.linsheUrl':'邻舍网址：','l.userName':'用户名：','l.facePrefix':'头像外链时的前置链接：','l.imgPrefix':'聊天记录的图片外链时的前置链接：','l.emojiPrefix':'表情包外链时的前置链接：','l.imgExt':'图片外链后缀：','l.chatboxStyle':'chatbox样式：','l.chatTitle':'聊天框标题：','l.mergeConsecutive':'是否合并同角色的连续发言：','l.autoSelectImages':'是否在自动连续勾选时也选中图片（影响导出）：','l.mdTemplateLabel':'md模板（参考 Obsidian Web Clipper）：','l.templateName':'模板名称：','l.mdFileNamePrivate':'md文件名（私聊）：','l.mdFileNameGroup':'md文件名（群聊）：','l.mdDirectObsidian':'md文件是否直接添加到Obsidian：','l.mdFolder':'Obsidian md文件夹：','l.mdExportDir':'md导出文件夹：','l.imgExportDir':'图片导出文件夹：','l.emojiExportDir':'表情包导出文件夹：','l.mdSubFolder':'md子文件夹：','l.mdSubFolderEnabled':'单次导出md时是否创建子文件夹：','l.imgSubFolder':'图片子文件夹：','l.imgSubFolderEnabled':'单次导出md的图片时是否创建子文件夹：','l.maxFileSize':'批量导出md时，每个md的最大文件大小：',
+    'h.settings':'设置','h.subtitle':'调整导出选项，保存后本地生效',
+    's.appearance':'外观','s.connection':'连接','s.imgLinks':'图片链接','s.exportFormat':'导出格式','s.mdTemplate':'md模板设置','s.obsidian':'导入Obsidian设置','s.exportAvatars':'导出头像',
+    'l.theme':'外观:','l.language':'系统语言:','l.linsheUrl':'邻舍网址:','l.userName':'用户名:','l.facePrefix':'头像外链时的前置链接:','l.imgPrefix':'聊天记录的图片外链时的前置链接:','l.emojiPrefix':'表情包外链时的前置链接:','l.imgExt':'图片外链后缀:','l.chatboxStyle':'chatbox样式:','l.chatTitle':'聊天框标题:','l.mergeConsecutive':'是否合并同角色的连续发言:','l.autoSelectImages':'是否在自动连续勾选时也选中图片（影响导出）:','l.mdTemplateLabel':'md模板（参考 Obsidian Web Clipper）:','l.templateName':'模板名称:','l.mdFileNamePrivate':'md文件名（私聊）:','l.mdFileNameGroup':'md文件名（群聊）:','l.mdDirectObsidian':'md文件是否直接添加到Obsidian:','l.mdFolder':'Obsidian md文件夹:','l.mdExportDir':'md导出文件夹:','l.imgExportDir':'图片导出文件夹:','l.emojiExportDir':'表情包导出文件夹:','l.mdSubFolder':'md子文件夹:','l.mdSubFolderEnabled':'单次导出md时是否创建子文件夹:','l.imgSubFolder':'图片子文件夹:','l.imgSubFolderEnabled':'单次导出md的图片时是否创建子文件夹:','l.maxFileSize':'批量导出md时，每个md的最大文件大小:',
     'o.theme.light':'浅色','o.theme.dark':'深色','o.theme.system':'跟随系统','o.lang.zh':'简体中文','o.lang.en':'English',
     'o.yes':'是','o.no':'否','o.chatboxStyle.normal':'普通','o.chatboxStyle.bbs':'bbs','o.chatboxStyle.pop':'pop','o.chatboxStyle.wechat':'wechat','o.chatboxStyle.qqchat':'qqchat','o.chatboxStyle.linshe':'邻舍','o.chatboxStyle.baker':'Baker',
     'n.theme':'浅色为默认配色；深色为深色整体配色；跟随系统则自动匹配操作系统的深浅色设置','n.linsheUrl':'此处的值直接更改 API 网址（默认：http://localhost:3099）。修改后点击"重新连接"立即生效，无需刷新页面','n.userName':'此处的值直接更改用户显示名称（默认："我"）','n.facePrefix':'这个链接 + 角色头像图片文件名 = 复制文本中的头像链接，留空时仅使用头像文件名（带后缀）。例如填写 http://192.168.31.24:37777/Notepic/Icon/ 后，用户的头像链接即为 http://192.168.31.24:37777/Notepic/Icon/user_avatar.png','n.imgPrefix':'作用跟头像外链前置一致，留空时仅使用图片文件名（不含后缀）+ 下方选择的后缀。','n.imgExt':'此处的值直接更改复制时聊天记录图片链接的后缀名及图片保存时的后缀名','n.chatboxStyle':'推荐圆形头像框的后三个样式','n.chatTitle':'默认为"角色名/群聊名"，支持与 md 文件名相同的变量（如 {{role}}、{{YYYY}}{{MM}}{{DD}} 等），渲染时替换','n.mdTemplate':'模板变量：{{mdFileName}} md文件名(不含.md) · {{title}} 聊天框标题 · {{date}} 日期(YYYY-MM-DD) · {{time}} 时间(HH:mm) · {{role}} 当前对话名（私聊为角色名、群聊为群聊名）· {{previousFileName}} 上一个md文件名(不含.md，批量导出时有效，第一个或单独导出为空) · {{content}} 聊天记录正文（复制格式）','n.mdFileNamePrivate':'变量按钮点击后插入到光标位置（无光标时加到末尾），{{YYYY}}{{MM}}{{DD}} 为聊天记录日期、{{hh}}{{mm}}{{ss}} 为记录时间（批量导出时取该文件第一条消息的时间），文件名最长 260 字符','n.mdFileNameGroup':'变量按钮点击后插入到光标位置（无光标时加到末尾），{{YYYY}}{{MM}}{{DD}} 为聊天记录日期、{{hh}}{{mm}}{{ss}} 为记录时间（批量导出时取该文件第一条消息的时间），文件名最长 260 字符','n.mdDirectObsidian':'选择"是"时，"导出md"按钮将通过 obsidian://new 在 Obsidian 仓库中创建文件（需已安装并打开过 Obsidian）；"范围批量导出md"始终按下方"md导出文件夹"设置导出到本地文件夹（Obsidian URI 批量导出大概率会丢失文件）。选择"否"时，"导出md"按"md导出文件夹"设置导出','n.mdFolder':'仅当"md文件是否直接添加到Obsidian"为"是"时使用，为 Obsidian 仓库根目录下的路径，支持用 "/" 创建子文件夹，如 "日记/{{YYYY}}{{MM}}{{DD}}_linsheMD"','n.mdExportDir':'预先指定 md 文件的导出位置（Chrome/Edge 支持）。未设置时，导出过程中会弹出"选择md导出文件夹"提示并让您选择；不支持选择文件夹的环境自动下载到浏览器默认下载文件夹','n.mdSubFolder':'会在导出到设置的本地文件夹时自动创建子文件夹，方便分类','n.imgExportDir':'预先指定图片的导出位置（Chrome/Edge 支持）。未设置时，导出过程中会弹出"选择图片导出文件夹"提示并让您选择；不支持选择文件夹的环境自动下载到浏览器默认下载文件夹','n.emojiExportDir':'功能同上','n.imgSubFolder':'会在导出到设置的本地文件夹时自动创建子文件夹，方便分类','n.exportAvatars':'一次性导出所有角色和用户的头像到指定文件夹里；不支持环境下自动下载到浏览器默认下载文件夹','n.maxFileSize':'建议不要超过50KB，否则在Obsidian里打开会很卡',
-    'b.reconnect':'🔄 重新连接','b.exportAvatars':'📷 导出头像','b.chooseMdDir':'📁 选择md导出文件夹','b.chooseImgDir':'📁 选择图片导出文件夹','b.chooseEmojiDir':'📁 选择表情包导出文件夹','b.newTemplate':'＋ 新建模板','b.exportTemplate':'📤 导出当前模板','b.importTemplate':'📥 导入当前模板','b.save':'💾 保存','b.reset':'↺ 重置','b.exportSettings':'📤 导出设置','b.importSettings':'📥 导入设置','b.copySelected':'📋 复制选中','b.exportMd':'📄 导出md','b.clear':'✕ 清除','b.batchExport':'🗂 范围批量导出md','b.go':'GO',
+    'b.reconnect':'重新连接','b.exportAvatars':'导出头像','b.chooseMdDir':'选择md导出文件夹','b.chooseImgDir':'选择图片导出文件夹','b.chooseEmojiDir':'选择表情包导出文件夹','b.newTemplate':'新建模板','b.exportTemplate':'导出当前模板','b.importTemplate':'导入当前模板','b.save':'保存','b.reset':'重置','b.exportSettings':'导出设置','b.importSettings':'导入设置','b.copySelected':'复制选中','b.exportMd':'导出md','b.clear':'清除','b.batchExport':'范围批量导出md','b.go':'GO',
     'tab.private':'私聊','tab.group':'群聊',
-    'ui.searchPlaceholder':'搜索角色/群聊…','ui.msgSearchPlaceholder':'空格分隔搜索关键词（内容/ID/角色名/日期），+扩大 -排除','ui.selectAllPrefix':'已选中','ui.selectAllMsg':'条消息和','ui.selectAllImg':'张图片','ui.selectAllHint':'勾选两条不连续的对话能自动选取中间所有的对话选框','ui.exportFromLabel':'已导出到 ID:','ui.pageJump':'跳转','ui.exportOverlay':'正在导出，请稍候…','ui.chatTitlePlaceholder':'← 请从左侧选择一个对话','ui.selectChatHint':'请从左侧选择一个对话','ui.notSet':'未设置，导出时提示选择','ui.folderSelected':'已选择：','ui.subtitle':'查看 & 框选复制','ui.exportOverlayBatch':'正在批量导出 {count} 个 md 文件…','ui.pageTitle':'邻舍 · 聊天记录导出器','ui.headerTitle':'📋 邻舍 · 聊天记录导出器','ui.connected':'已连接','ui.checkingConnection':'检查连接…','ui.connectFailed':'连接失败','ui.selectImg':'选中此图片','ui.jumpContext':'上下文','ui.searchHintFound':'找到 {filtered} / {total} 条','ui.searchHintTotal':'{total} 条消息','ui.clearSearch':'✕ 清除搜索','ui.pageInfo':'第 <span class=\"highlight\">{page}</span>/{totalPages} 页 · 共 <span class=\"highlight\">{total}</span> 条','ui.exportAllTitle':'按日期批量导出从文本框ID之后到末尾的聊天记录（0=导出全部）','ui.settingsPage':'设置页面',
+    'ui.searchPlaceholder':'搜索角色/群聊…','ui.msgSearchPlaceholder':'空格分隔搜索关键词（内容/ID/角色名/日期），+扩大 -排除','ui.selectAllPrefix':'已选中','ui.selectAllMsg':'条消息和','ui.selectAllImg':'张图片','ui.selectAllHint':'勾选两条不连续的对话能自动选取中间所有的对话选框','ui.exportFromLabel':'已导出到 ID:','ui.pageJump':'跳转','ui.exportOverlay':'正在导出，请稍候…','ui.chatTitlePlaceholder':'← 请从左侧选择一个对话','ui.selectChatHint':'请从左侧选择一个对话','ui.notSet':'未设置，导出时提示选择','ui.folderSelected':'已选择:','ui.subtitle':'查看 & 框选复制','ui.exportOverlayBatch':'正在批量导出 {count} 个 md 文件…','ui.pageTitle':'邻舍 · 聊天记录导出器','ui.headerTitle':'邻舍 · 聊天记录导出器','ui.connected':'已连接','ui.checkingConnection':'检查连接…','ui.connectFailed':'连接失败','ui.selectImg':'选中此图片','ui.jumpContext':'上下文','ui.searchHintFound':'找到 {filtered} / {total} 条','ui.searchHintTotal':'{total} 条消息','ui.clearSearch':'清除搜索','ui.pageInfo':'第 <span class=\"highlight\">{page}</span>/{totalPages} 页 · 共 <span class=\"highlight\">{total}</span> 条','ui.exportAllTitle':'按日期批量导出从文本框ID之后到末尾的聊天记录（0=导出全部）','ui.settingsPage':'设置页面',
     'ui.noResults':'没有匹配的结果','ui.noData':'暂无数据','ui.noSearchResults':'没有匹配的消息','ui.tryOtherKeywords':'试试其他关键词','ui.noMessages':'暂无消息记录','ui.msgCount':'共 {count} 条','ui.filteredCount':'共 {total} 条 · 筛选出 {filtered} 条','ui.loadingMessages':'加载消息中…',
     'tt.editTemplate':'编辑此模板','tt.exportTemplate':'导出此模板为 JSON','tt.importTemplate':'导入 JSON 到此模板','tt.deleteTemplate':'删除此模板','tt.jumpContext':'跳转到原始聊天记录，查看上下文','tt.exportFromLabel':'范围批量导出从该 ID 之后的第一条消息开始','tt.reconnect':'按当前设置的网址重新连接并刷新角色/群聊列表','tt.pageFirst':'首页','tt.pagePrev':'上一页','tt.pageNext':'下一页','tt.pageLast':'末页','tt.setDefaultTemplate':'设为默认模板','tt.selectTimeDivider':'选择时间分割线',
     'tab.settings':'设置',
     'vb.年':'年','vb.月':'月','vb.日':'日','vb.时':'时','vb.分':'分','vb.秒':'秒','vb.角色名/群聊名':'角色名/群聊名','vb.标题':'标题','vb.md文件名':'md文件名','vb.日期':'日期','vb.时间':'时间','vb.日期时间':'日期时间','vb.上一个md文件名':'上一个md文件名','vb.聊天记录正文':'聊天记录正文',
-    't.exportDone':'✅ 批量导出完成，共 {count} 个文件','t.exportDoneSkipped':'✅ 批量导出完成：新增 {count} 个，跳过 {skipped} 个已存在','t.exportStart':'开始批量导出 {count} 个 md 文件…','t.noMessages':'当前没有可导出的对话记录','t.allExported':'已全部导出，不再重复','t.selectMdDir':'⚠️ 批量导出前请先选择"md导出文件夹"（可点击设置页中的"选择md导出文件夹"）','t.selectImgDir':'⚠️ 批量导出附带图片，请先选择"图片导出文件夹"，否则无法导出图片','t.imageFailed':'⚠️ {count} 张图片下载失败（网络超时或加载错误，已跳过）','t.jumpToId':'已跳转到 ID: {id}（第 {page} 页）','t.mdZipDownloaded':'✅ md + 图片已打包为 ZIP 下载','t.zipDone':'✅ ZIP 打包完成，共 {count} 个文件','t.imgZipDone':'✅ 图片 ZIP 打包完成，共 {count} 张','t.settingsSaved':'✅ 设置已保存','t.settingsReset':'✅ 设置已重置为默认值','t.settingsExported':'✅ 设置已导出为 JSON 文件','t.settingsImported':'✅ 设置已从 JSON 文件导入','t.settingsImportFailed':'导入失败：不是有效的设置 JSON','t.operationInProgress':'⏳ 操作进行中，请稍候…','t.folderSelected':'✅ 已选择{which}导出文件夹：{name}','t.folderSelectFailed':'选择文件夹失败: {msg}','t.imageDirWarning':'⚠️ 图片将下载到浏览器默认下载文件夹；大量图片可能被浏览器拦截，建议先设置"图片导出文件夹"','t.exportOverlay':'正在批量导出 {count} 个 md 文件…','t.copyCount':'📋 复制选中 ({count})','t.exportFromTooBig':'已导出到 ID 不能大于最后一条消息的 ID','t.idNotFound':'未找到该 ID 的消息','t.templateExported':'✅ 模板已导出为 JSON','t.templateImported':'✅ 模板已导入','t.templateImportFailed':'❌ 模板导入失败：不是有效的 JSON','t.fileTooLong':'⚠️ 文件 {relPath} 内容过长（{size}MB），已改用本地导出','t.dirNotFound':'⚠️ {which}导出文件夹不存在，请重新选择','t.writeFailed':'⚠️ 文件夹写入失败，导出已停止','t.noDirPicker':'当前浏览器不支持选择文件夹（需 Chrome/Edge）','t.chooseDirPrompt':'请选择{which}导出文件夹','t.folderSelectFailFallback':'选择文件夹失败，改用默认下载文件夹','t.folderSelectAborted':'文件夹选择未响应，请再点一次按钮重试','t.noSelectionExport':'请先勾选要导出的消息或图片','t.mdExported':'✅ md 文件已导出到文件夹：{name}','t.mdExportedRenamed':'✅ 已存在同名文件，已重命名导出：{name}','t.mdWriteFailed':'⚠️ 写入 md 导出文件夹失败','t.mdTooLongNoDir':'⚠️ 内容过长无法通过 Obsidian 创建，且未设置 md 导出文件夹。请先在设置中选择"md导出文件夹"后重试','t.obsidianSent':'✅ 已发送到 Obsidian 创建笔记','t.mdDownloadStarted':'✅ md 文件已开始导出（默认下载）','t.mdExportStarted':'✅ md 文件已开始导出','t.mdWriteFailed2':'md 文件写入失败：','t.noMdDirBatch':'⚠️ 未选择 md 导出文件夹，批量导出已停止','t.reconnecting':'🔄 正在重新连接…','t.connectFailCheck':'❌ 连接失败：请检查"邻舍地址"设置是否正确','t.reconnected':'✅ 已重新连接','t.loadCharsFail':'加载角色失败: ','t.loadGroupsFail':'加载群聊失败: ','t.loadMsgsFail':'加载消息失败: ','t.loadGroupMsgsFail':'加载群消息失败: ','t.busySwitch':'⚠️ 复制/导出/下载进行中，请稍候再切换','t.busySwitchChat':'⚠️ 复制/导出/下载进行中，请稍候再切换对话','t.avatarExportNoAvatars':'ℹ️ 没有可导出的头像','t.avatarExportStart':'📷 正在导出 {count} 个头像…','t.avatarExportDone':'✅ 已导出 {count} 个头像文件（跳过 {skipped} 个重复）','t.searchClears':'搜索将清空当前选择','t.pageRange':'页码应在 1~{total} 之间','t.ctxNotFound':'未找到该消息的上下文','t.pageJumped':'已跳转到原始记录第 {page} 页','t.noImgDir':'⚠️ 未设置图片导出文件夹，图片将下载到浏览器默认下载文件夹','t.noSelectionCopy':'请先勾选要复制的消息或图片','t.nothingSelected':'没有选中任何消息或图片','t.copied':'✅ 已复制 {count} 项','t.copyFailed':'复制失败，请手动复制','t.exportInterrupted':'⏹ 已中断导出，并未完成全部导出任务','t.exportInterruptedImgSize':'⚠️ 因图片过大已中断导出，请检查图片是否已全部压缩','t.exportInterruptedImgSize2':'⚠️ 仍然有图片未压缩，请检查图片是否已全部压缩','t.imgSizeSkipped':'部分图片因为过大而未能导出','t.exportImagesOnlyDone':'✅ 已导出 {count} 张图片','t.exportImagesDoneSkipped':'✅ 已导出 {count} 张图片，跳过了 {skipped} 张已存在图片','t.exportImagesAllSkipped':'ℹ️ 图片全部已存在，跳过导出','t.exportImgSizeLimitTooSmall':'⚠️ 图片限制下载过小，请修改设置！','t.noImagesToExport':'没有可导出的图片','l.imgMaxKB':'图片限制下载大小：','n.imgMaxKB':'当图片大小超过该值时，会立即中断下载，以防止下载到未压缩图片，值为0时不做限制','b.interruptExport':'⏹ 中断导出','ui.imagesOnly':'仅图片','t.zipMemoryConfirm':'当前导出 ZIP 会占用大量内存，是否继续导出？（更推荐选择文件夹后批量导出）','t.downloadingImages':'正在下载 {count} 张图片…','t.connectFailedHint':'无法连接到邻舍服务（{url}）<br>请确认邻舍正在运行',
+    't.exportDone':' 批量导出完成，共 {count} 个文件','t.exportDoneSkipped':' 批量导出完成：新增 {count} 个，跳过 {skipped} 个已存在','t.exportStart':'开始批量导出 {count} 个 md 文件…','t.noMessages':'当前没有可导出的对话记录','t.allExported':'已全部导出，不再重复','t.selectMdDir':' 批量导出前请先选择"md导出文件夹"（可点击设置页中的"选择md导出文件夹"）','t.selectImgDir':' 批量导出附带图片，请先选择"图片导出文件夹"，否则无法导出图片','t.imageFailed':' {count} 张图片下载失败（网络超时或加载错误，已跳过）','t.jumpToId':'已跳转到 ID: {id}（第 {page} 页）','t.mdZipDownloaded':' md + 图片已打包为 ZIP 下载','t.zipDone':' ZIP 打包完成，共 {count} 个文件','t.imgZipDone':' 图片 ZIP 打包完成，共 {count} 张','t.settingsSaved':' 设置已保存','t.settingsReset':' 设置已重置为默认值','t.settingsExported':' 设置已导出为 JSON 文件','t.settingsImported':' 设置已从 JSON 文件导入','t.settingsImportFailed':'导入失败：不是有效的设置 JSON','t.operationInProgress':' 操作进行中，请稍候…','t.folderSelected':' 已选择{which}导出文件夹：{name}','t.folderSelectFailed':'选择文件夹失败: {msg}','t.imageDirWarning':' 图片将下载到浏览器默认下载文件夹；大量图片可能被浏览器拦截，建议先设置"图片导出文件夹"','t.exportOverlay':'正在批量导出 {count} 个 md 文件…','t.copyCount':' 复制选中 ({count})','t.exportFromTooBig':'已导出到 ID 不能大于最后一条消息的 ID','t.idNotFound':'未找到该 ID 的消息','t.templateExported':' 模板已导出为 JSON','t.templateImported':' 模板已导入','t.templateImportFailed':' 模板导入失败：不是有效的 JSON','t.fileTooLong':' 文件 {relPath} 内容过长（{size}MB），已改用本地导出','t.dirNotFound':' {which}导出文件夹不存在，请重新选择','t.writeFailed':' 文件夹写入失败，导出已停止','t.noDirPicker':'当前浏览器不支持选择文件夹（需 Chrome/Edge）','t.chooseDirPrompt':'请选择{which}导出文件夹','t.folderSelectFailFallback':'选择文件夹失败，改用默认下载文件夹','t.folderSelectAborted':'文件夹选择未响应，请再点一次按钮重试','t.noSelectionExport':'请先勾选要导出的消息或图片','t.mdExported':' md 文件已导出到文件夹：{name}','t.mdExportedRenamed':' 已存在同名文件，已重命名导出：{name}','t.mdWriteFailed':' 写入 md 导出文件夹失败','t.mdTooLongNoDir':' 内容过长无法通过 Obsidian 创建，且未设置 md 导出文件夹。请先在设置中选择"md导出文件夹"后重试','t.obsidianSent':' 已发送到 Obsidian 创建笔记','t.mdDownloadStarted':' md 文件已开始导出（默认下载）','t.mdExportStarted':' md 文件已开始导出','t.mdWriteFailed2':'md 文件写入失败','t.noMdDirBatch':' 未选择 md 导出文件夹，批量导出已停止','t.reconnecting':' 正在重新连接…','t.connectFailCheck':' 连接失败：请检查"邻舍地址"设置是否正确','t.reconnected':' 已重新连接','t.loadCharsFail':'加载角色失败: ','t.loadGroupsFail':'加载群聊失败: ','t.loadMsgsFail':'加载消息失败: ','t.loadGroupMsgsFail':'加载群消息失败: ','t.busySwitch':' 复制/导出/下载进行中，请稍候再切换','t.busySwitchChat':' 复制/导出/下载进行中，请稍候再切换对话','t.avatarExportNoAvatars':' 没有可导出的头像','t.avatarExportStart':' 正在导出 {count} 个头像…','t.avatarExportDone':' 已导出 {count} 个头像文件（跳过 {skipped} 个重复）','t.searchClears':'搜索将清空当前选择','t.pageRange':'页码应在 1~{total} 之间','t.ctxNotFound':'未找到该消息的上下文','t.pageJumped':'已跳转到原始记录第 {page} 页','t.noImgDir':' 未设置图片导出文件夹，图片将下载到浏览器默认下载文件夹','t.noSelectionCopy':'请先勾选要复制的消息或图片','t.nothingSelected':'没有选中任何消息或图片','t.copied':' 已复制 {count} 项','t.copyFailed':'复制失败，请手动复制','t.exportInterrupted':' 已中断导出，并未完成全部导出任务','t.exportInterruptedImgSize':' 因图片过大已中断导出，请检查图片是否已全部压缩','t.exportInterruptedImgSize2':' 仍然有图片未压缩，请检查图片是否已全部压缩','t.imgSizeSkipped':'部分图片因为过大而未能导出','t.exportImagesOnlyDone':' 已导出 {count} 张图片','t.exportImagesDoneSkipped':' 已导出 {count} 张图片，跳过了 {skipped} 张已存在图片','t.exportImagesAllSkipped':' 图片全部已存在，跳过导出','t.exportImgSizeLimitTooSmall':' 图片限制下载过小，请修改设置！','t.noImagesToExport':'没有可导出的图片','l.imgMaxKB':'图片限制下载大小','n.imgMaxKB':'当图片大小超过该值时，会立即中断下载，以防止下载到未压缩图片，值为0时不做限制','b.interruptExport':' 中断导出','ui.imagesOnly':'仅图片','t.zipMemoryConfirm':'当前导出 ZIP 会占用大量内存，是否继续导出？（更推荐选择文件夹后批量导出）','t.downloadingImages':'正在下载 {count} 张图片…','t.connectFailedHint':'无法连接到邻舍服务（{url}）<br>请确认邻舍正在运行',
   },
   en: {
-    'h.settings':'⚙️ Settings','h.subtitle':'Adjust export options, saved locally',
-    's.appearance':'🎨 Appearance','s.connection':'🔗 Connection','s.imgLinks':'🖼️ Image Links','s.exportFormat':'💬 Export Format','s.mdTemplate':'📄 MD Template Settings','s.obsidian':'📥 Obsidian Import Settings','s.exportAvatars':'📷 Export Avatars',
+    'h.settings':'Settings','h.subtitle':'Adjust export options, saved locally',
+    's.appearance':'Appearance','s.connection':'Connection','s.imgLinks':'Image Links','s.exportFormat':'Export Format','s.mdTemplate':'MD Template Settings','s.obsidian':'Obsidian Import Settings','s.exportAvatars':'Export Avatars',
     'l.theme':'Theme:','l.language':'Language:','l.linsheUrl':'Linshe URL:','l.userName':'Username:','l.facePrefix':'Avatar external link prefix:','l.imgPrefix':'Image external link prefix:','l.emojiPrefix':'Emoji image external link prefix:','l.imgExt':'Image extension:','l.chatboxStyle':'Chatbox style:','l.chatTitle':'Chat title:','l.mergeConsecutive':'Merge consecutive messages from same role:','l.autoSelectImages':'Auto-select images with consecutive selection:','l.mdTemplateLabel':'MD template (see Obsidian Web Clipper):','l.templateName':'Template name:','l.mdFileNamePrivate':'MD filename (private):','l.mdFileNameGroup':'MD filename (group):','l.mdDirectObsidian':'Add MD files directly to Obsidian:','l.mdFolder':'Obsidian MD Folder:','l.mdExportDir':'MD export folder:','l.imgExportDir':'Image export folder:','l.emojiExportDir':'Emoji image export folder:','l.mdSubFolder':'MD Subfolder:','l.mdSubFolderEnabled':'Create subfolder on single MD export:','l.imgSubFolder':'Image Subfolder:','l.imgSubFolderEnabled':'Create subfolder on single image export:','l.maxFileSize':'Max file size per MD when batch exporting:',
     'o.theme.light':'Light','o.theme.dark':'Dark','o.theme.system':'System','o.lang.zh':'简体中文','o.lang.en':'English',
     'o.yes':'Yes','o.no':'No','o.chatboxStyle.normal':'Normal','o.chatboxStyle.bbs':'bbs','o.chatboxStyle.pop':'pop','o.chatboxStyle.wechat':'wechat','o.chatboxStyle.qqchat':'qqchat','o.chatboxStyle.linshe':'Linshe','o.chatboxStyle.baker':'Baker',
     'n.theme':'Light is the default theme; Dark is a dark theme; System follows the OS setting automatically','n.linsheUrl':'Changes the API URL (default: http://localhost:3099). Click "Reconnect" after changing to apply immediately','n.userName':'Changes the display name shown in exports (default: "我")','n.facePrefix':'This prefix + avatar filename = avatar link in copied text. Leave empty to use only the filename. Example: If input http://192.168.31.24:37777/Notepic/Icon/ , face link = http://192.168.31.24:37777/Notepic/Icon/user_avatar.png','n.imgPrefix':'Same as avatar prefix. Leave empty to use only filename (no extension) + the extension selected below.','n.imgExt':'Changes the extension used in exported image links and saved image filenames','n.chatboxStyle':'The last three styles are recommended for circular avatars','n.chatTitle':'Default: "Role/Group". Supports same variables as MD filename ({{role}}, {{YYYY}}, etc.), replaced when rendering','n.mdTemplate':'Template variables: {{mdFileName}} MD filename (no .md) · {{title}} Chat title · {{date}} Date (YYYY-MM-DD) · {{time}} Time (HH:mm) · {{role}} Current chat name · {{previousFileName}} Previous MD filename · {{content}} Message body','n.mdFileNamePrivate':'Variable buttons insert at cursor. {{YYYY}}{{MM}}{{DD}} = chat date, {{hh}}{{mm}}{{ss}} = message time. Max 260 chars.','n.mdFileNameGroup':'Variable buttons insert at cursor. {{YYYY}}{{MM}}{{DD}} = chat date, {{hh}}{{mm}}{{ss}} = message time. Max 260 chars.','n.mdDirectObsidian':'When "Yes", "Export MD" creates files via obsidian://new (Obsidian must be installed). "Batch Export MD" always uses the MD export folder setting below. When "No", "Export MD" uses the MD export folder.','n.mdFolder':'Only used when "Add MD files directly to Obsidian" is "Yes". Path relative to Obsidian vault root. Use "/" for subfolders, e.g. "Diary/{{YYYY}}{{MM}}{{DD}}_linsheMD"','n.mdExportDir':'Pre-select MD export folder (Chrome/Edge). If not set, you will be prompted during export.','n.mdSubFolder':'Creates subfolders automatically when exporting to the local folder, for easy organization','n.imgExportDir':'Pre-select image export folder (Chrome/Edge). If not set, you will be prompted during export.','n.imgSubFolder':'Creates subfolders automatically when exporting images to the local folder, for easy organization','n.exportAvatars':'Export all character and user avatars to a folder. If folder selection is not supported, files will be downloaded to the default download folder.','n.maxFileSize':'Recommended max 50KB, otherwise Obsidian may lag when opening large files.','n.emojiExportDir':'Same as above',
-    'b.reconnect':'🔄 Reconnect','b.exportAvatars':'📷 Export Avatars','b.chooseMdDir':'📁 Choose MD Export Folder','b.chooseImgDir':'📁 Choose Image Export Folder','b.chooseEmojiDir':'📁 Choose Emoji Export Folder','b.newTemplate':'＋ New Template','b.exportTemplate':'📤 Export Template','b.importTemplate':'📥 Import Template','b.save':'💾 Save','b.reset':'↺ Reset','b.exportSettings':'📤 Export Settings','b.importSettings':'📥 Import Settings','b.copySelected':'📋 Copy Selected','b.exportMd':'📄 Export MD','b.clear':'✕ Clear','b.batchExport':'🗂 Batch Export MD','b.go':'GO',
+    'b.reconnect':'Reconnect','b.exportAvatars':'Export Avatars','b.chooseMdDir':'Choose MD Export Folder','b.chooseImgDir':'Choose Image Export Folder','b.chooseEmojiDir':'Choose Emoji Export Folder','b.newTemplate':'New Template','b.exportTemplate':'Export Template','b.importTemplate':'Import Template','b.save':'Save','b.reset':'Reset','b.exportSettings':'Export Settings','b.importSettings':'Import Settings','b.copySelected':'Copy Selected','b.exportMd':'Export MD','b.clear':'Clear','b.batchExport':'Batch Export MD','b.go':'GO',
     'tab.private':'Private','tab.group':'Group',
-    'ui.searchPlaceholder':'Search characters/groups…','ui.msgSearchPlaceholder':'Space-separated keywords (content/ID/role/date), +expand -exclude','ui.selectAllPrefix':'Selected','ui.selectAllMsg':'messages and','ui.selectAllImg':'images','ui.selectAllHint':'Check two non-consecutive messages to auto-select all between them','ui.exportFromLabel':'Exported up to ID:','ui.pageJump':'Jump','ui.exportOverlay':'Exporting, please wait…','ui.chatTitlePlaceholder':'← Select a chat from the left','ui.selectChatHint':'Select a chat from the left','ui.notSet':'Not set, will prompt during export','ui.folderSelected':'Selected: ','ui.subtitle':'View & Select Copy','ui.exportOverlayBatch':'Batch exporting {count} MD files…','ui.pageTitle':'Linshe · Chat Exporter','ui.headerTitle':'📋 Linshe · Chat Exporter','ui.connected':'Connected','ui.checkingConnection':'Checking connection…','ui.connectFailed':'Connection failed','ui.selectImg':'Select this image','ui.jumpContext':'Context','ui.searchHintFound':'Found {filtered} / {total}','ui.searchHintTotal':'{total} messages','ui.clearSearch':'✕ Clear Search','ui.pageInfo':'Page <span class=\"highlight\">{page}</span>/{totalPages} · <span class=\"highlight\">{total}</span> total','ui.exportAllTitle':'Batch export messages from the entered ID to the end by date (0 = export all)','ui.settingsPage':'Settings Page',
+    'ui.searchPlaceholder':'Search characters/groups…','ui.msgSearchPlaceholder':'Space-separated keywords (content/ID/role/date), +expand -exclude','ui.selectAllPrefix':'Selected','ui.selectAllMsg':'messages and','ui.selectAllImg':'images','ui.selectAllHint':'Check two non-consecutive messages to auto-select all between them','ui.exportFromLabel':'Exported up to ID:','ui.pageJump':'Jump','ui.exportOverlay':'Exporting, please wait…','ui.chatTitlePlaceholder':'← Select a chat from the left','ui.selectChatHint':'Select a chat from the left','ui.notSet':'Not set, will prompt during export','ui.folderSelected':'Selected: ','ui.subtitle':'View & Select Copy','ui.exportOverlayBatch':'Batch exporting {count} MD files…','ui.pageTitle':'Linshe · Chat Exporter','ui.headerTitle':'Linshe · Chat Exporter','ui.connected':'Connected','ui.checkingConnection':'Checking connection…','ui.connectFailed':'Connection failed','ui.selectImg':'Select this image','ui.jumpContext':'Context','ui.searchHintFound':'Found {filtered} / {total}','ui.searchHintTotal':'{total} messages','ui.clearSearch':'Clear Search','ui.pageInfo':'Page <span class=\"highlight\">{page}</span>/{totalPages} · <span class=\"highlight\">{total}</span> total','ui.exportAllTitle':'Batch export messages from the entered ID to the end by date (0 = export all)','ui.settingsPage':'Settings Page',
     'ui.noResults':'No matching results','ui.noData':'No data','ui.noSearchResults':'No matching messages','ui.tryOtherKeywords':'Try other keywords','ui.noMessages':'No messages yet','ui.msgCount':'{count} total','ui.filteredCount':'{total} total · {filtered} filtered','ui.loadingMessages':'Loading messages…',
     'tt.editTemplate':'Edit this template','tt.exportTemplate':'Export this template as JSON','tt.importTemplate':'Import JSON to this template','tt.deleteTemplate':'Delete this template','tt.jumpContext':'Jump to original chat','tt.exportFromLabel':'Batch export starting from the first message after this ID','tt.reconnect':'Reconnect using the current URL and refresh the character/group list','tt.pageFirst':'First page','tt.pagePrev':'Previous page','tt.pageNext':'Next page','tt.pageLast':'Last page','tt.setDefaultTemplate':'Set as default template','tt.selectTimeDivider':'Select time divider',
     'tab.settings':'Settings',
     'vb.年':'Year','vb.月':'Month','vb.日':'Day','vb.时':'Hour','vb.分':'Minute','vb.秒':'Second','vb.角色名/群聊名':'Role/Group','vb.标题':'Title','vb.md文件名':'MD File Name','vb.日期':'Date','vb.时间':'Time','vb.日期时间':'Date/Time','vb.上一个md文件名':'Previous MD File','vb.聊天记录正文':'Content',
-    't.exportDone':'✅ Batch export complete, {count} files total','t.exportDoneSkipped':'✅ Batch export complete: {count} new, {skipped} existing skipped','t.exportStart':'Starting batch export of {count} MD files…','t.noMessages':'No messages to export','t.allExported':'All exported, no duplicates','t.selectMdDir':'⚠️ Please select "MD Export Folder" first (in settings page)','t.selectImgDir':'⚠️ Please select "Image Export Folder" first','t.imageFailed':'⚠️ {count} images failed to download (skipped)','t.jumpToId':'Jumped to ID: {id} (page {page})','t.mdZipDownloaded':'✅ MD + images downloaded as ZIP','t.zipDone':'✅ ZIP complete: {count} files','t.imgZipDone':'✅ Image ZIP complete: {count} images','t.settingsSaved':'✅ Settings saved','t.settingsReset':'✅ Settings reset to defaults','t.settingsExported':'✅ Settings exported as JSON file','t.settingsImported':'✅ Settings imported from JSON file','t.settingsImportFailed':'⚠️ Import failed: invalid file format','t.operationInProgress':'⏳ Operation in progress, please wait…','t.folderSelected':'✅ {which} export folder selected: {name}','t.folderSelectFailed':'Folder selection failed: {msg}','t.imageDirWarning':'⚠️ Images will be downloaded to default folder; may be blocked. Recommended to set "Image export folder" first','t.exportOverlay':'Batch exporting {count} MD files…','t.copyCount':'📋 Copy Selected ({count})','t.exportFromTooBig':'Export ID cannot be greater than the last message ID','t.idNotFound':'Message ID not found','t.templateExported':'✅ Template exported as JSON','t.templateImported':'✅ Template imported','t.templateImportFailed':'❌ Template import failed: invalid JSON','t.fileTooLong':'⚠️ File {relPath} is too long ({size}MB), fell back to local export','t.dirNotFound':'⚠️ {which} export folder not found, please reselect','t.writeFailed':'⚠️ Folder write failed, export stopped','t.noDirPicker':'Your browser does not support folder selection (requires Chrome/Edge)','t.chooseDirPrompt':'Please select {which} export folder','t.folderSelectFailFallback':'Folder selection failed, using default download folder','t.folderSelectAborted':'Folder picker did not respond, please click the button again','t.noSelectionExport':'Please select messages or images to export first','t.mdExported':'✅ MD file exported to folder: {name}','t.mdExportedRenamed':'✅ File with same name existed, renamed to: {name}','t.mdWriteFailed':'⚠️ Failed to write MD export folder','t.mdTooLongNoDir':'⚠️ Content too long for Obsidian, and no MD export folder set. Please set "MD Export Folder" in settings first','t.obsidianSent':'✅ Sent to Obsidian to create note','t.mdDownloadStarted':'✅ MD file export started (default download)','t.mdExportStarted':'✅ MD file export started','t.mdWriteFailed2':'MD file write failed: ','t.noMdDirBatch':'⚠️ No MD export folder selected, batch export stopped','t.reconnecting':'🔄 Reconnecting…','t.connectFailCheck':'❌ Connection failed: please check "Linshe URL" setting','t.reconnected':'✅ Reconnected','t.loadCharsFail':'Failed to load characters: ','t.loadGroupsFail':'Failed to load groups: ','t.loadMsgsFail':'Failed to load messages: ','t.loadGroupMsgsFail':'Failed to load group messages: ','t.busySwitch':'⚠️ Copy/export/download in progress, please wait before switching','t.busySwitchChat':'⚠️ Copy/export/download in progress, please wait before switching chats','t.avatarExportNoAvatars':'ℹ️ No avatars to export','t.avatarExportStart':'📷 Exporting {count} avatars…','t.avatarExportDone':'✅ Exported {count} avatar files ({skipped} duplicates skipped)','t.searchClears':'Searching will clear current selection','t.pageRange':'Page number must be between 1 and {total}','t.ctxNotFound':'Message context not found','t.pageJumped':'Jumped to page {page}','t.noImgDir':'⚠️ No image export folder set, images will download to default folder','t.noSelectionCopy':'Please select messages or images to copy first','t.nothingSelected':'No messages or images selected','t.copied':'✅ Copied {count} items','t.copyFailed':'Copy failed, please try manually','t.exportInterrupted':'⏹ Export interrupted, not all tasks completed','t.exportInterruptedImgSize':'⚠️ Export interrupted due to oversized image, please check if all images are compressed','t.exportInterruptedImgSize2':'⚠️ Some images still not compressed, please check if all images are compressed','t.imgSizeSkipped':'Some images were skipped due to size limit','t.exportImagesOnlyDone':'✅ Exported {count} images','t.exportImagesDoneSkipped':'✅ Exported {count} images, {skipped} existing skipped','t.exportImagesAllSkipped':'ℹ️ All images already exist, skipped','t.exportImgSizeLimitTooSmall':'⚠️ Image size limit is too small, please update the setting!','t.noImagesToExport':'No images to export','l.imgMaxKB':'Image download size limit:','n.imgMaxKB':'When an image exceeds this size, the export will be interrupted immediately to prevent downloading uncompressed images. Set to 0 for no limit.','b.interruptExport':'⏹ Interrupt Export','ui.imagesOnly':'Images Only','t.zipMemoryConfirm':'This ZIP export will use a lot of memory. Continue? (Selecting an export folder first is recommended)','t.downloadingImages':'Downloading {count} images…','t.connectFailedHint':'Cannot connect to the Linshe service ({url})<br>Make sure Linshe is running',
+    't.exportDone':' Batch export complete, {count} files total','t.exportDoneSkipped':' Batch export complete: {count} new, {skipped} existing skipped','t.exportStart':'Starting batch export of {count} MD files…','t.noMessages':'No messages to export','t.allExported':'All exported, no duplicates','t.selectMdDir':' Please select "MD Export Folder" first (in settings page)','t.selectImgDir':' Please select "Image Export Folder" first','t.imageFailed':' {count} images failed to download (skipped)','t.jumpToId':'Jumped to ID: {id} (page {page})','t.mdZipDownloaded':' MD + images downloaded as ZIP','t.zipDone':' ZIP complete: {count} files','t.imgZipDone':' Image ZIP complete: {count} images','t.settingsSaved':' Settings saved','t.settingsReset':' Settings reset to defaults','t.settingsExported':' Settings exported as JSON file','t.settingsImported':' Settings imported from JSON file','t.settingsImportFailed':' Import failed: invalid file format','t.operationInProgress':' Operation in progress, please wait…','t.folderSelected':' {which} export folder selected: {name}','t.folderSelectFailed':'Folder selection failed: {msg}','t.imageDirWarning':' Images will be downloaded to default folder; may be blocked. Recommended to set "Image export folder" first','t.exportOverlay':'Batch exporting {count} MD files…','t.copyCount':' Copy Selected ({count})','t.exportFromTooBig':'Export ID cannot be greater than the last message ID','t.idNotFound':'Message ID not found','t.templateExported':' Template exported as JSON','t.templateImported':' Template imported','t.templateImportFailed':' Template import failed: invalid JSON','t.fileTooLong':' File {relPath} is too long ({size}MB), fell back to local export','t.dirNotFound':' {which} export folder not found, please reselect','t.writeFailed':' Folder write failed, export stopped','t.noDirPicker':'Your browser does not support folder selection (requires Chrome/Edge)','t.chooseDirPrompt':'Please select {which} export folder','t.folderSelectFailFallback':'Folder selection failed, using default download folder','t.folderSelectAborted':'Folder picker did not respond, please click the button again','t.noSelectionExport':'Please select messages or images to export first','t.mdExported':' MD file exported to folder: {name}','t.mdExportedRenamed':' File with same name existed, renamed to: {name}','t.mdWriteFailed':' Failed to write MD export folder','t.mdTooLongNoDir':' Content too long for Obsidian, and no MD export folder set. Please set "MD Export Folder" in settings first','t.obsidianSent':' Sent to Obsidian to create note','t.mdDownloadStarted':' MD file export started (default download)','t.mdExportStarted':' MD file export started','t.mdWriteFailed2':'MD file write failed: ','t.noMdDirBatch':' No MD export folder selected, batch export stopped','t.reconnecting':' Reconnecting…','t.connectFailCheck':' Connection failed: please check "Linshe URL" setting','t.reconnected':' Reconnected','t.loadCharsFail':'Failed to load characters: ','t.loadGroupsFail':'Failed to load groups: ','t.loadMsgsFail':'Failed to load messages: ','t.loadGroupMsgsFail':'Failed to load group messages: ','t.busySwitch':' Copy/export/download in progress, please wait before switching','t.busySwitchChat':' Copy/export/download in progress, please wait before switching chats','t.avatarExportNoAvatars':' No avatars to export','t.avatarExportStart':' Exporting {count} avatars…','t.avatarExportDone':' Exported {count} avatar files ({skipped} duplicates skipped)','t.searchClears':'Searching will clear current selection','t.pageRange':'Page number must be between 1 and {total}','t.ctxNotFound':'Message context not found','t.pageJumped':'Jumped to page {page}','t.noImgDir':' No image export folder set, images will download to default folder','t.noSelectionCopy':'Please select messages or images to copy first','t.nothingSelected':'No messages or images selected','t.copied':' Copied {count} items','t.copyFailed':'Copy failed, please try manually','t.exportInterrupted':' Export interrupted, not all tasks completed','t.exportInterruptedImgSize':' Export interrupted due to oversized image, please check if all images are compressed','t.exportInterruptedImgSize2':' Some images still not compressed, please check if all images are compressed','t.imgSizeSkipped':'Some images were skipped due to size limit','t.exportImagesOnlyDone':' Exported {count} images','t.exportImagesDoneSkipped':' Exported {count} images, {skipped} existing skipped','t.exportImagesAllSkipped':' All images already exist, skipped','t.exportImgSizeLimitTooSmall':' Image size limit is too small, please update the setting!','t.noImagesToExport':'No images to export','l.imgMaxKB':'Image download size limit:','n.imgMaxKB':'When an image exceeds this size, the export will be interrupted immediately to prevent downloading uncompressed images. Set to 0 for no limit.','b.interruptExport':' Interrupt Export','ui.imagesOnly':'Images Only','t.zipMemoryConfirm':'This ZIP export will use a lot of memory. Continue? (Selecting an export folder first is recommended)','t.downloadingImages':'Downloading {count} images…','t.connectFailedHint':'Cannot connect to the Linshe service ({url})<br>Make sure Linshe is running',
   }
 };
 function t(key, vars) {
@@ -1167,14 +1263,9 @@ function applyLang() {
   });
   // 语言切换时重绘变量按钮（仅语言实际变化时重建 DOM，避免每次输入都销毁重建）
   if (langChanged) initVarButtons();
-  // 更新页面标题和版头标题
+  // 更新页面标题和版头标题（头部的 SVG 图标有 data-i18n 子元素，不会被 textContent 覆盖）
   document.title = t('ui.pageTitle');
-  const h1 = document.querySelector('.header h1');
-  if (h1) h1.textContent = t('ui.headerTitle');
-  // 更新状态栏（如果已连接）
-  if (statusBadge && (statusBadge.textContent.includes('已连接') || statusBadge.textContent.includes('Connected'))) {
-    statusBadge.textContent = '✅ ' + t('ui.connected');
-  }
+  // 更新状态栏（如果已连接）- 已改为通过 data-i18n 子元素自动更新
   // 重新渲染消息列表以更新图片复选框 tooltip 及动态文本（设置页不渲染，避免 selectAllBar 出现在设置页底部）
   if (state.tab !== 'settings') renderMessages();
   // 重新渲染侧边栏以更新空状态/角色列表文本（如"设置页面"）
@@ -1710,7 +1801,7 @@ function importSettings() {
         applyTheme();
         showToast(t('t.settingsImported'), 'success');
       } catch (e) {
-        showToast('❌ ' + t('t.settingsImportFailed'), 'error');
+        showToast(' ' + t('t.settingsImportFailed'), 'error');
       }
     };
     reader.readAsText(file);
@@ -1738,10 +1829,10 @@ function renderMdTemplateList() {
         <input type="radio" name="mdDefaultTemplate" ${settings.mdTemplateDefaultId === tpl.id ? 'checked' : ''} onchange="setDefaultMdTemplate('${tpl.id}')">
       </label>
       <span class="md-template-name" onclick="selectMdTemplate('${tpl.id}')" title="${escapeHtmlAttr(tpl.name)}">${escapeHtml(tpl.name)}</span>
-      <button type="button" class="md-template-btn" onclick="selectMdTemplate('${tpl.id}')" data-i18n-title="tt.editTemplate">✏️</button>
-      <button type="button" class="md-template-btn" onclick="exportMdTemplate('${tpl.id}')" data-i18n-title="tt.exportTemplate">📤</button>
-      <button type="button" class="md-template-btn" onclick="importMdTemplate('${tpl.id}')" data-i18n-title="tt.importTemplate">📥</button>
-      ${tpl.id === 'default' ? '' : `<button type="button" class="md-template-btn" onclick="deleteMdTemplate('${tpl.id}')" data-i18n-title="tt.deleteTemplate">🗑</button>`}
+      <button type="button" class="md-template-btn" onclick="selectMdTemplate('${tpl.id}')" data-i18n-title="tt.editTemplate"><svg class="icon icon-sm" aria-hidden="true"><use href="#icon-edit"/></svg></button>
+      <button type="button" class="md-template-btn" onclick="exportMdTemplate('${tpl.id}')" data-i18n-title="tt.exportTemplate"><svg class="icon icon-sm" aria-hidden="true"><use href="#icon-upload"/></svg></button>
+      <button type="button" class="md-template-btn" onclick="importMdTemplate('${tpl.id}')" data-i18n-title="tt.importTemplate"><svg class="icon icon-sm" aria-hidden="true"><use href="#icon-download"/></svg></button>
+      ${tpl.id === 'default' ? '' : `<button type="button" class="md-template-btn" onclick="deleteMdTemplate('${tpl.id}')" data-i18n-title="tt.deleteTemplate"><svg class="icon icon-sm" aria-hidden="true"><use href="#icon-trash-2"/></svg></button>`}
     </div>`).join('');
 }
 
@@ -1846,7 +1937,7 @@ function importMdTemplate(id) {
         scheduleTemplateSave(); // 持久化，避免刷新丢失
         showToast(t('t.templateImported'), 'success');
       } catch (e) {
-        showToast('❌ ' + t('t.templateImportFailed'), 'error');
+        showToast(' ' + t('t.templateImportFailed'), 'error');
       }
     };
     reader.readAsText(file);
@@ -3578,18 +3669,22 @@ async function apiGet(path) {
 }
 
 async function checkConnection() {
+  const setStatusText = (text) => {
+    const span = statusBadge.querySelector('[data-i18n]');
+    if (span) span.textContent = text; else statusBadge.textContent = text;
+  };
   try {
-    statusBadge.textContent = '🔍 ' + t('ui.checkingConnection');
     statusBadge.className = 'status';
+    setStatusText(t('ui.checkingConnection'));
     const data = await apiGet('/characters');
     if (data && data.characters !== undefined) {
-      statusBadge.textContent = '✅ ' + t('ui.connected');
+      setStatusText(t('ui.connected'));
       statusBadge.className = 'status online';
       return true;
     }
     throw new Error('返回格式异常');
   } catch (err) {
-    statusBadge.textContent = `❌ ${t('ui.connectFailed')}: ${err.message}`;
+    setStatusText(`${t('ui.connectFailed')}: ${err.message}`);
     statusBadge.className = 'status error';
     return false;
   }
@@ -3754,7 +3849,7 @@ let _sidebarCacheKey = '';
 function renderSidebar() {
   if (state.tab === 'settings') {
     _sidebarCacheKey = '';
-    sidebarList.innerHTML = `<div class="empty-state" style="padding:40px"><div class="icon">⚙️</div><div class="text">${t('ui.settingsPage')}</div></div>`;
+    sidebarList.innerHTML = `<div class="empty-state" style="padding:40px"><div class="icon"></div><div class="text">${t('ui.settingsPage')}</div></div>`;
     return;
   }
   const q = ($('searchInput').value || '').trim().toLowerCase();
@@ -3773,7 +3868,7 @@ function renderSidebar() {
   _sidebarCacheKey = cacheKey;
 
   if (items.length === 0) {
-    sidebarList.innerHTML = `<div class="empty-state" style="padding:40px"><div class="icon">📭</div><div class="text">${q ? t('ui.noResults') : t('ui.noData')}</div></div>`;
+    sidebarList.innerHTML = `<div class="empty-state" style="padding:40px"><svg class="icon icon-xl" aria-hidden="true" style="opacity:0.4"><use href="#icon-inbox"/></svg><div class="text">${q ? t('ui.noResults') : t('ui.noData')}</div></div>`;
     return;
   }
 
@@ -3858,7 +3953,7 @@ function switchTab(tab) {
     return;
   }
   messageList.style.display = 'flex';
-  messageList.innerHTML = `<div class="empty-state"><div class="icon">👈</div><div class="text">${t('ui.selectChatHint')}</div></div>`;
+  messageList.innerHTML = `<div class="empty-state"><svg class="icon icon-xl" aria-hidden="true" style="opacity:0.4"><use href="#icon-arrow-left"/></svg><div class="text">${t('ui.selectChatHint')}</div></div>`;
   searchBar.style.display = 'none';
   paginationBar.style.display = 'none';
   selectAllBar.style.display = 'none';
@@ -3889,7 +3984,7 @@ async function selectChat(type, id, name) {
   const searchInput = searchBar.querySelector('input');
   if (searchInput) searchInput.value = '';
 
-  chatTitle.textContent = `📁 ${name}`;
+  chatTitle.textContent = ` ${name}`;
   chatType.textContent = type === 'private' ? t('tab.private') : t('tab.group');
   messageList.innerHTML = `<div class="loading"><div class="spinner"></div> ${t('ui.loadingMessages')}</div>`;
 
@@ -4777,9 +4872,9 @@ function renderMessages() {
 
   if (allMsgs.length === 0) {
     if (state.searchQuery) {
-      messageList.innerHTML = `<div class="empty-state"><div class="icon">🔍</div><div class="text">${t('ui.noSearchResults')}<br><span style="font-size:12px;color:#94a3b8;">${t('ui.tryOtherKeywords')}</span></div></div>`;
+      messageList.innerHTML = `<div class="empty-state"><div class="icon"></div><div class="text">${t('ui.noSearchResults')}<br><span style="font-size:12px;color:#94a3b8;">${t('ui.tryOtherKeywords')}</span></div></div>`;
     } else {
-      messageList.innerHTML = `<div class="empty-state"><div class="icon">💬</div><div class="text">${t('ui.noMessages')}</div></div>`;
+      messageList.innerHTML = `<div class="empty-state"><div class="icon"></div><div class="text">${t('ui.noMessages')}</div></div>`;
     }
     stats.textContent = t('ui.msgCount', {count: state.currentMessages.length});
     renderSearchBar();
@@ -5105,6 +5200,7 @@ function toggleImg(checkboxEl) {
     if (msgId !== undefined) state.selectedIds.add(msgId);
     // 与上次锚点（消息或图片）之间自动连续选中中间所有对话，跨页有效
     if (msgId !== undefined && state.lastSelectedId !== null && state.lastSelectedId !== msgId && state.selectedIds.size > 0) {
+      const msgIds = getMsgIds();
       const idx1 = msgIds.indexOf(state.lastSelectedId);
       const idx2 = msgIds.indexOf(msgId);
       if (idx1 !== -1 && idx2 !== -1) {
@@ -5740,7 +5836,7 @@ document.addEventListener('keydown', (e) => {
   await loadCharacters();
   await loadGroups();
   renderSidebar();
-  messageList.innerHTML = `<div class="empty-state"><div class="icon">👈</div><div class="text">${t('ui.selectChatHint')}</div></div>`;
+  messageList.innerHTML = `<div class="empty-state"><svg class="icon icon-xl" aria-hidden="true" style="opacity:0.4"><use href="#icon-arrow-left"/></svg><div class="text">${t('ui.selectChatHint')}</div></div>`;
 })();
 </script>
 </body>
