@@ -5726,23 +5726,23 @@ function buildMarkdownFormat(msgs, opts) {
       // 统一 face 链接：前置链接+头像文件名，或本地原链接
       const avatarUrl = buildFaceUrl(m._avatarUrl || (isUser ? userAvatarUrl() : defaultCharAvatar()), exportDate);
 
-    if (isUser) {
-      // User: always show full header
-      lines.push(`> + ![face](${avatarUrl}) \`${speaker}\` ${content}`);
-      prevRole = 'user';
-      prevSpeaker = 'user';
-    } else {
-      // Character/Assistant: use own avatar file name
-      if (prevRole === 'user' || prevSpeaker !== speaker) {
-        // First line of this character's block
-        lines.push(`> - ![face](${avatarUrl}) \`${speaker}\` ${content}`);
-      } else if (settings.mergeConsecutive) {
-        // Same character continuing (merge)
-        if (content.trim()) lines.push(`> ${content}`);
+      if (isUser) {
+        // User: always show full header
+        lines.push(`> + ![face](${avatarUrl}) \`${speaker}\` ${content}`);
+        prevRole = 'user';
+        prevSpeaker = 'user';
       } else {
-        // Same character continuing (no merge)
-        let line = `> - ${content}`;
-        if (line.trim() !== '>' && line.trim() !== '> -') lines.push(line);
+        // Character/Assistant: use own avatar file name
+        if (prevRole === 'user' || prevSpeaker !== speaker) {
+          // First line of this character's block
+          lines.push(`> - ![face](${avatarUrl}) \`${speaker}\` ${content}`);
+        } else if (settings.mergeConsecutive) {
+          // Same character continuing (merge)
+          if (content.trim()) lines.push(`> ${content}`);
+        } else {
+          // Same character continuing (no merge)
+          let line = `> - ${content}`;
+          if (line.trim() !== '>' && line.trim() !== '> -') lines.push(line);
         }
         // 角色/图片→时间分割线→角色 时，为下一条角色发言补充 face 链接
         if (tdFixNextRole && !isUser) {
