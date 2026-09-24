@@ -5608,6 +5608,13 @@ function transformFormatContent(text) {
   });
 }
 
+// 跨行斜体修复用的正则常量（提到模块级：避免循环内每行新建正则对象）
+// _MD_BLOCK_RE：列表项行（硬换行），斜体不能跨它 → 需要补 *
+// _MD_INSERT_AT_RE：行首补 * 的插入点 = 块标记之后、face 链接与角色名之后
+//   （URL 用 [^`]* 而非 [^)]*，以便头像文件名/URL 中含 ) 时仍能定位到正确边界）
+const _MD_BLOCK_RE = /^> [-+] /;
+const _MD_INSERT_AT_RE = /^> [-+] (?:!\[[^\]]*\]\([^`]*\)\s*)?(?:`[^`]*`\s*)?/;
+
 function buildMarkdownFormat(msgs, opts) {
 	opts = opts || {};
 	const forceAllImages = !!opts.forceAllImages;
@@ -5809,28 +5816,41 @@ function buildMarkdownFormat(msgs, opts) {
     text = header + '\n> \n> ' + dt.date + ' ' + dt.time + '\n' + text;
   }
 
-  // 修复括号斜体跨行：当不合并连续发言时，*（和）*可能在不同行。
-  // 如果一行中有 *（但没有 ）*，在该行末尾补 * 闭合斜体；
-  // 如果一行中有 ）* 但没有 *（，在该行对话文本开头（> - 或 > + 之后）补 * 开启斜体。
+  // 修复括号斜体跨行：*（ 与 ）* 可能落在不同的 > - / > + 列表项里，
+  // 而 Obsidian 的斜体不能跨列表项 → 在行边界补 *。
+  // 判据是"进入/离开本行时斜体是否仍未闭合"（顺序扫描标记 + 跨行携带），
+  // 而不是"整行是否含 *（ / ）*"——后者对"同行先闭后开"的行两个分支都不进，
+  // 对两侧都处于开启态的中间行也全判 false，导致漏补。
+  //   · 行首已处于开启态，或行内出现"无对应开启的 ）*" → 行首补 *（插在 face 链接与角色名之后，
+  //     否则斜体范围会错误覆盖 face 链接与角色名）
+  //   · 行尾仍未闭合 → 行尾补 * 闭合
+  //   · > 软换行行（merge 模式的续行）不补：斜体可跨软换行
   if (!settings.mergeConsecutive && (text.includes('*（') || text.includes('）*'))) {
     const lines = text.split('\n');
     let modified = false;
+    let openCount = 0; // 跨行携带的未闭合斜体数
     for (let i = 0; i < lines.length; i++) {
       const line = lines[i];
-      const hasOpen = line.includes('*（');
-      const hasClose = line.includes('）*');
-      if (hasOpen && !hasClose) {
-        // 有开启无闭合：行末补 *
-        lines[i] = line + '*';
-        modified = true;
-      } else if (hasClose && !hasOpen) {
-        // 有闭合无开启：在对话文本开头补 *（在 > - 或 > + 或 > 之后）
-        const m = line.match(/^(> [-+ ] )/);
-        if (m) {
-          lines[i] = m[1] + '*' + line.slice(m[1].length);
+      const isBlock = _MD_BLOCK_RE.test(line);
+      let bal = openCount, loneClose = false;
+      for (let p = 0; ;) {
+        const a = line.indexOf('*（', p);
+        const b = line.indexOf('）*', p);
+        if (a === -1 && b === -1) break;
+        if (b === -1 || (a !== -1 && a < b)) { bal++; p = a + 2; }
+        else { if (bal > 0) bal--; else loneClose = true; p = b + 2; }
+      }
+      if (isBlock && (openCount > 0 || loneClose || bal > 0)) {
+        const at = _MD_INSERT_AT_RE.exec(line)[0].length;
+        if (line.length > at) { // 有正文才补：纯图片行、空行不动
+          let out = line;
+          if (openCount > 0 || loneClose) out = out.slice(0, at) + '*' + out.slice(at);
+          if (bal > 0) out += '*';
+          lines[i] = out;
           modified = true;
         }
       }
+      openCount = bal;
     }
     if (modified) text = lines.join('\n');
   }
