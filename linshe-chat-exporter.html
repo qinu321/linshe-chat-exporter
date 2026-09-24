@@ -1403,6 +1403,12 @@ function deduplicateEmojiByUrl(emojiImgs) {
   });
 }
 
+// 把图片拆成「普通图片 + 去重后的表情包」（多处导出路径共用，避免重复写 split/dedup）
+function splitNormalAndEmoji(imgs) {
+  const { normal, emoji } = splitEmojiImages(imgs);
+  return { normal, emojiUnique: deduplicateEmojiByUrl(emoji) };
+}
+
 // ── State ──
 let state = {
   tab: 'private',
@@ -1415,7 +1421,6 @@ let state = {
   selectedIds: new Set(),
   	  selectedImgKeys: new Set(), // selected image keys: "msgId:imgIdx"
   	  selectedTimeDividerKeys: new Set(), // selected time divider keys: "td:<afterMsgId>"
-  selectAll: false,
   // Pagination
   currentPage: 1,
   pageSize: 100,
@@ -2022,8 +2027,8 @@ function initVarButtons() {
         return `<button type="button" class="var-btn" data-code="${code}" data-input="${inputId}">${btnLabel}</button>`;
       }).join('');
   });
-  // 统一用事件委托：mousedown 阻止默认行为（避免输入框失焦），click 时在光标处插入
-  // 注意：事件监听只在此处注册一次（通过 _varBtnInit 标志），避免 applyLang 反复调用时重复绑定
+  // 统一用事件委托：mousedown 阻止默认行为（避免输入框失焦），click 时在光标处插入；
+  // 监听的注册在 initVarBtnEvents()（仅注册一次），本函数只负责渲染按钮 DOM
 }
 
 // 变量按钮事件委托（仅注册一次）
@@ -2654,21 +2659,7 @@ async function exportSelectedMdImpl() {
     }, async () => {
       if (imgs.length > 0) {
         bundledInZip = true; // md 写入失败回退 ZIP：图片已随包
-        // 先检查文件数量（避免不必要的 fetch）
-        if (!confirmZipDownload(1 + imgs.length)) return;
-        const zipEntries = [];
-        const encoder = new TextEncoder();
-        zipEntries.push({ name: fileName, data: encoder.encode(content) });
-        // 表情包去重后合并到同一个 ZIP
-        const { normal, emoji } = splitEmojiImages(imgs);
-        const emojiUnique = deduplicateEmojiByUrl(emoji);
-        const allImgs = normal.concat(emojiUnique);
-        await _batchFetchImagesToZip(allImgs, zipEntries);
-        if (zipEntries.length > 0) {
-          const zipName = `${fileName.replace(/\.md$/, '')}_${new Date().toISOString().slice(0, 10)}.zip`;
-          downloadZipBlob(await createZipBlob(zipEntries), zipName);
-          showToast(t('t.mdZipDownloaded'), 'success');
-        }
+        if (!await downloadZipWithImages(fileName, content, imgs)) return;
       } else {
         downloadTextFile(fileName, content);
         showToast(t('t.mdDownloadStarted'), 'success');
@@ -2677,21 +2668,7 @@ async function exportSelectedMdImpl() {
     if (!mdWriteOk) return;
   } else if (imgs.length > 0) {
     bundledInZip = true; // 图片已随 md 打包进 ZIP
-    // 先检查文件数量（避免不必要的 fetch）
-    if (!confirmZipDownload(1 + imgs.length)) return;
-    const zipEntries = [];
-    const encoder = new TextEncoder();
-    zipEntries.push({ name: fileName, data: encoder.encode(content) });
-    // 表情包去重后合并到同一个 ZIP
-    const { normal, emoji } = splitEmojiImages(imgs);
-    const emojiUnique = deduplicateEmojiByUrl(emoji);
-    const allImgs = normal.concat(emojiUnique);
-    await _batchFetchImagesToZip(allImgs, zipEntries);
-    if (zipEntries.length > 0) {
-      const zipName = `${fileName.replace(/\.md$/, '')}_${new Date().toISOString().slice(0, 10)}.zip`;
-      downloadZipBlob(await createZipBlob(zipEntries), zipName);
-      showToast(t('t.mdZipDownloaded'), 'success');
-    }
+    if (!await downloadZipWithImages(fileName, content, imgs)) return;
   } else {
     downloadTextFile(fileName, content);
     showToast(t('t.mdExportStarted'), 'success');
@@ -2699,8 +2676,7 @@ async function exportSelectedMdImpl() {
   // 导出图片（ZIP 已打包的除外）。Obsidian 直传模式下 mdDir 为 null，
   // 图片仍按 imgDir/ZIP 正常导出，不能因 md 走了 Obsidian 而静默丢弃
   if (imgs.length > 0 && !bundledInZip) {
-    const { normal, emoji } = splitEmojiImages(imgs);
-    const emojiUnique = deduplicateEmojiByUrl(emoji);
+    const { normal, emojiUnique } = splitNormalAndEmoji(imgs);
     // 处理普通图片
     if (normal.length > 0) {
       if (imgDir) {
@@ -2712,11 +2688,11 @@ async function exportSelectedMdImpl() {
           }
           await downloadImagesToDir(normal, target);
         }, async () => {
-          await downloadImagesBatched(normal, null);
+          await downloadImagesBatched(normal);
         });
       } else {
         if (!confirmZipDownload(normal.length)) return;
-        await downloadImagesBatched(normal, null);
+        await downloadImagesBatched(normal);
       }
     }
     // 处理表情包图片
@@ -2727,11 +2703,11 @@ async function exportSelectedMdImpl() {
           // 表情包不创建子文件夹
           await downloadImagesToDir(emojiUnique, dir);
         }, async () => {
-          await downloadImagesBatched(emojiUnique, null);
+          await downloadImagesBatched(emojiUnique);
         });
       } else {
         if (!confirmZipDownload(emojiUnique.length)) return;
-        await downloadImagesBatched(emojiUnique, null);
+        await downloadImagesBatched(emojiUnique);
       }
     }
     if (state.interruptExport && state.interruptReason === 'imgSize') {
@@ -2877,7 +2853,7 @@ async function exportAllMdCore() {
               if (imgSubPath) target = await getOrCreateSubDir(dir, imgSubPath);
               await downloadImagesToDir(batchNormal, target);
             }, async () => {
-              await downloadImagesBatched(batchNormal, null);
+              await downloadImagesBatched(batchNormal);
             });
           } else if (zipEntries) {
             await fetchImagesForZip(batchNormal, zipEntries, seenZipNames);
@@ -2891,7 +2867,7 @@ async function exportAllMdCore() {
               // 表情包不创建子文件夹
               await downloadImagesToDir(batchEmojiUnique, dir);
             }, async () => {
-              await downloadImagesBatched(batchEmojiUnique, null);
+              await downloadImagesBatched(batchEmojiUnique);
             });
           } else if (zipEntries) {
             await fetchImagesForZip(batchEmojiUnique, zipEntries, seenZipNames);
@@ -3057,8 +3033,7 @@ async function exportAllImagesOnly() {
     return;
   }
   // 一次性分离表情包和普通图片（后续循环不再重复遍历）
-  const { normal: allNormal, emoji: allEmoji } = splitEmojiImages(allImgs);
-  const allEmojiUnique = deduplicateEmojiByUrl(allEmoji);
+  const { normal: allNormal, emojiUnique: allEmojiUnique } = splitNormalAndEmoji(allImgs);
   // 尝试获取文件夹句柄，用户取消选择或浏览器不支持时回退到 ZIP 打包
   let imgDirHandle = null;
   let emojiDirHandle = null;
@@ -3107,7 +3082,7 @@ async function exportAllImagesOnly() {
           totalDownloaded += stats.downloaded || 0;
           totalSkipped += stats.skipped || 0;
         }, async () => {
-          await downloadImagesBatched(batchNormal, null);
+          await downloadImagesBatched(batchNormal);
         });
       } else if (zipEntries) {
         await fetchImagesForZip(batchNormal, zipEntries, seenZipNames);
@@ -3123,7 +3098,7 @@ async function exportAllImagesOnly() {
           totalDownloaded += stats.downloaded || 0;
           totalSkipped += stats.skipped || 0;
         }, async () => {
-          await downloadImagesBatched(batchEmojiUnique, null);
+          await downloadImagesBatched(batchEmojiUnique);
         });
       } else if (zipEntries) {
         await fetchImagesForZip(batchEmojiUnique, zipEntries, seenZipNames);
@@ -3361,11 +3336,10 @@ function collectImagesForMsgs(msgs, forceAll) {
   return result;
 }
 
-// 下载单张图片到相对路径（folderRel 可为空）。返回 true=成功 / false=失败
-function downloadOneImage(img, folderRel) {
+// 下载单张图片（无目录句柄时的回退路径，走浏览器默认下载）。返回 true=成功 / false=失败
+function downloadOneImage(img) {
   const rawName = img.url.split('/').pop() || `image_${Date.now()}`;
   const filename = `${rawName.replace(/\.[^.]+$/, '')}.${settings.imgExt || 'png'}`;
-  const relPath = folderRel ? String(folderRel).replace(/\/+$/g, '') + '/' + filename : filename;
   // 单张图片 5 秒超时：超时或失败仅跳过该张，不中断后续图片
   const controller = new AbortController();
   const timer = setTimeout(() => controller.abort(), 5000);
@@ -3376,7 +3350,7 @@ function downloadOneImage(img, folderRel) {
     const blobUrl = URL.createObjectURL(blob);
     const a = document.createElement('a');
     a.href = blobUrl;
-    a.download = relPath;
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     document.body.removeChild(a);
@@ -3393,7 +3367,7 @@ function downloadOneImage(img, folderRel) {
 
 // 批次下载：每批最多 batchSize 张，批次间留出时间片避免浏览器崩溃。
 // 改用 ZIP 打包下载（避免浏览器拦截多文件下载导致丢失），内部调用 _batchFetchImagesToZip
-async function downloadImagesBatched(imgs, folderRel, batchSize = 5) {
+async function downloadImagesBatched(imgs, batchSize = 5) {
   if (!imgs || imgs.length === 0) return;
   const zipEntries = [];
   const failed = await _batchFetchImagesToZip(imgs, zipEntries, batchSize);
@@ -3477,7 +3451,7 @@ async function downloadImagesToDir(imgs, dirHandle, batchSize = 10) {
         downloaded++;
       } catch (e) {
         if (!state.interruptExport) {
-          const ok = await downloadOneImage(img, null);
+          const ok = await downloadOneImage(img);
           if (!ok) failed++;
         }
       } finally {
@@ -3574,6 +3548,22 @@ function downloadZipBlob(blob, zipName) {
   document.body.appendChild(a); a.click();
   document.body.removeChild(a);
   setTimeout(() => URL.revokeObjectURL(url), 5000);
+}
+
+// 把 md 正文与去重后的图片一起打包成 ZIP 下载（md 单导出的两条回退路径共用）。
+// 返回 false 表示用户在体积确认框点了取消，调用方应中止后续流程
+async function downloadZipWithImages(baseName, content, imgs) {
+  // 先检查文件数量（避免不必要的 fetch）
+  if (!confirmZipDownload(1 + imgs.length)) return false;
+  const zipEntries = [{ name: baseName, data: _UTF8_ENCODER.encode(content) }];
+  const { normal, emojiUnique } = splitNormalAndEmoji(imgs);
+  await _batchFetchImagesToZip(normal.concat(emojiUnique), zipEntries);
+  if (zipEntries.length > 0) {
+    const zipName = `${baseName.replace(/\.md$/, '')}_${new Date().toISOString().slice(0, 10)}.zip`;
+    downloadZipBlob(await createZipBlob(zipEntries), zipName);
+    showToast(t('t.mdZipDownloaded'), 'success');
+  }
+  return true;
 }
 
 // 统一批次化图片 fetch 到 ZIP entries（每批 5 张，批次间 300ms 喘息）
@@ -3729,6 +3719,7 @@ async function apiGet(path) {
   }
 }
 
+// 检查连接：成功时返回 /characters 的响应数据（供 loadCharacters 复用，省一次 RTT），失败返回 false
 async function checkConnection() {
   const setStatusText = (text) => {
     const span = statusBadge.querySelector('[data-i18n]');
@@ -3741,7 +3732,7 @@ async function checkConnection() {
     if (data && data.characters !== undefined) {
       setStatusText(t('ui.connected'));
       statusBadge.className = 'status online';
-      return true;
+      return data;
     }
     throw new Error('返回格式异常');
   } catch (err) {
@@ -3756,15 +3747,15 @@ async function checkConnection() {
 // 用 withBusy 防重入：连点"重新连接"不会并发执行多次请求
 async function reconnectImpl() {
   showToast(t('t.reconnecting'), 'info');
-  const ok = await checkConnection();
-  if (!ok) {
+  const charsData = await checkConnection();
+  if (!charsData) {
     state.characters = [];
     state.groups = [];
     renderSidebar();
     showToast(t('t.connectFailCheck'), 'error');
     return;
   }
-  await loadCharacters();
+  await loadCharacters(charsData); // 复用 checkConnection 已拉取的响应，不再重复请求 /characters
   await loadGroups();
   renderSidebar();
   if (state.currentType && state.currentId != null && state.tab !== 'settings') {
@@ -3774,9 +3765,10 @@ async function reconnectImpl() {
 }
 const reconnect = withBusy(BUSY_KEYS.RECONNECT, reconnectImpl);
 
-async function loadCharacters() {
+// prefetchedData：checkConnection 已拉取的 /characters 响应，传入则不再重复请求
+async function loadCharacters(prefetchedData) {
   try {
-    const data = await apiGet('/characters');
+    const data = prefetchedData || await apiGet('/characters');
     state.characters = (data.characters || []).map(c => ({
       ...c,
       _type: 'private',
@@ -4043,7 +4035,6 @@ async function selectChat(type, id, name) {
   state.selectedImgKeys = new Set();
   state.selectedTimeDividerKeys = new Set();
   state.lastSelectedId = null;
-  state.selectAll = false;
   state.searchQuery = '';
   state.currentPage = 1;
   state.jumpTargetId = null;
@@ -5032,7 +5023,7 @@ function toggleMsg(id) {
           }
         }
         // 自动连续勾选时也选中范围内的中间时间分割线
-        selectTimeDividersInRange(start, end);
+        applyTimeDividersInRange(start, end);
       } else {
         // Fallback: just select the clicked one
         state.selectedIds.add(id);
@@ -5085,7 +5076,7 @@ function toggleTimeDivider(checkboxEl) {
             }
           }
         }
-        selectTimeDividersInRange(start, end);
+        applyTimeDividersInRange(start, end);
       }
     }
     if (msgId) state.lastSelectedId = msgId;
@@ -5118,10 +5109,6 @@ function applyTimeDividersInRange(startIdx, endIdx) {
       }
     }
   }
-}
-
-function selectTimeDividersInRange(startIdx, endIdx) {
-  applyTimeDividersInRange(startIdx, endIdx);
 }
 
 function toggleSelectAll() {
@@ -5190,7 +5177,6 @@ function clearSelection() {
 	state.selectedImgKeys.clear();
 	state.selectedTimeDividerKeys.clear();
 	state.lastSelectedId = null;
-  state.selectAll = false;
   selectAllCheckbox.checked = false;
   refreshSelectionUI();
   updateSelectAllBar();
@@ -5213,7 +5199,6 @@ function updateSelectAllBar() {
     selectedMsgCount.textContent = msgCount + ' + ' + tdCount + 't';
 	}
   selectAllCheckbox.checked = pageAllSelected;
-  state.selectAll = pageAllSelected;
 }
 
 // 轻量刷新选中 UI：按 state 更新 DOM 中已有消息/图片复选框的状态与 .selected 样式，
@@ -5290,7 +5275,7 @@ function toggleImg(checkboxEl) {
           }
         }
         // 自动连续勾选时也选中中间的时间分割线
-        selectTimeDividersInRange(start, end);
+        applyTimeDividersInRange(start, end);
       }
     }
     if (msgId !== undefined) state.lastSelectedId = msgId;
@@ -5334,8 +5319,7 @@ async function downloadSelectedImagesCore() {
   const imgs = collectSelectedImages();
   if (imgs.length === 0) return;
   // 分离表情包图片和普通图片，表情包按 URL 去重
-  const { normal, emoji } = splitEmojiImages(imgs);
-  const emojiUnique = deduplicateEmojiByUrl(emoji);
+  const { normal, emojiUnique } = splitNormalAndEmoji(imgs);
   // 仅使用"已设置的图片导出文件夹"句柄；不在此处弹窗选择——
   // 本函数可能在复制后的异步回调中被调用（用户手势已失效，showDirectoryPicker 会被浏览器拒绝），
   // 未设置句柄时直接下载到浏览器默认下载文件夹并在 toast 说明
@@ -5348,7 +5332,7 @@ async function downloadSelectedImagesCore() {
   if (bothZip) {
     // 合并到一个 ZIP 下载
     const allImgs = normal.concat(emojiUnique);
-    await downloadImagesBatched(allImgs, null);
+    await downloadImagesBatched(allImgs);
     return;
   }
   // 处理普通图片
@@ -5362,10 +5346,10 @@ async function downloadSelectedImagesCore() {
         }
         await downloadImagesToDir(normal, target);
       }, async () => {
-        await downloadImagesBatched(normal, null);
+        await downloadImagesBatched(normal);
       });
     } else {
-      await downloadImagesBatched(normal, null);
+      await downloadImagesBatched(normal);
     }
   }
   // 处理表情包图片
@@ -5375,10 +5359,10 @@ async function downloadSelectedImagesCore() {
         // 表情包不创建子文件夹
         await downloadImagesToDir(emojiUnique, dir);
       }, async () => {
-        await downloadImagesBatched(emojiUnique, null);
+        await downloadImagesBatched(emojiUnique);
       });
     } else {
-      await downloadImagesBatched(emojiUnique, null);
+      await downloadImagesBatched(emojiUnique);
     }
   }
 }
@@ -5786,8 +5770,8 @@ function buildMarkdownFormat(msgs, opts) {
 
   let text = lines.join('\n');
   const firstLine = lines[0] || '';
-  const STYLE_MAP = { '': '', bbs: 'bbs', pop: 'pop', wechat: 'wechat', qqchat: 'qqchat', linshe: 'linshe', baker: 'baker' };
-  let headerType = STYLE_MAP[settings.chatboxStyle] !== undefined ? STYLE_MAP[settings.chatboxStyle] : 'linshe';
+  // 聊天框样式白名单校验：非法/未知值回落 linshe（原 STYLE_MAP 是恒等映射，用白名单判断等价且更直接）
+  let headerType = CHATBOX_STYLE_VALUES.includes(settings.chatboxStyle) ? settings.chatboxStyle : 'linshe';
   // 私聊时，"邻舍"样式用 linshe-noname、"Baker"样式用 baker-noname（群聊保持原样式不变）
   if (state.currentType === 'private') {
     if (headerType === 'linshe') headerType = 'linshe-noname';
@@ -5915,15 +5899,15 @@ document.addEventListener('keydown', (e) => {
   initVarBtnEvents();
   applyLang();
   await restoreExportDirs(); // await：避免用户立即导出时文件夹句柄尚未恢复而重复弹窗
-  const connected = await checkConnection();
-  if (!connected) {
+  const charsData = await checkConnection();
+  if (!charsData) {
     messageList.innerHTML = `<div class="empty-state">
       <svg class="icon icon-xl" aria-hidden="true" style="opacity:0.4"><use href="#icon-plug"/></svg>
       <div class="text">${t('t.connectFailedHint', {url: linsheOrigin()})}</div>
     </div>`;
     return;
   }
-  await loadCharacters();
+  await loadCharacters(charsData); // 复用 checkConnection 已拉取的响应，不再重复请求 /characters
   await loadGroups();
   renderSidebar();
   messageList.innerHTML = `<div class="empty-state"><svg class="icon icon-xl" aria-hidden="true" style="opacity:0.4"><use href="#icon-arrow-left"/></svg><div class="text">${t('ui.selectChatHint')}</div></div>`;
