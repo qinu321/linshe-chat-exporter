@@ -2795,10 +2795,12 @@ async function exportAllMdCore() {
     for (const part of splitMdBatch(e, forceAllImages, MAX_MD_BYTES)) batches.push(part);
   }
   let zipEntries = mdDirHandle ? null : []; // 无文件夹句柄时使用 ZIP 收集
+  // 遮罩：数量 > 10 时显示。文案里的数量必须是 md 文件数（batches.length），
+  // 不是消息条数——按日期分组并按大小切分后，两者通常不相等
+  if (rangeMsgs.length > 10) showExportOverlay(t('ui.exportOverlayBatch', {count: batches.length}));
   // 先检查文件数量（避免不必要的 fetch）
   if (zipEntries && !confirmZipDownload(batches.length)) return;
   showToast(t('t.exportStart', {count: batches.length}), 'success');
-  // 遮罩不再在此无条件显示：由调用方 exportAllMdImpl 按数量（>10）决定，并传入对应操作的文案
   // 串行导出：md 写入是本地快操作，串行可保证 {{previousFileName}} 取到前一个文件的"实际写入名"
   // （含同名重命名结果），并避免并发"检查-写入"竞态
   let currentMdDir = mdDirHandle;
@@ -2927,7 +2929,7 @@ async function exportAllMdCore() {
 // 中断导出标志已迁移到 state 中集中管理（state.interruptExport / state.interruptReason / state.interruptMsgId）
 // exportOverlayFirstShow 已迁移到 state 中
 const exportOverlayEl = $('exportOverlay');
-// 导出数量 > 10 时由调用方（exportAllMdImpl / downloadSelectedImagesImpl）显示全屏半透明遮罩
+// 导出数量 > 10 时由调用方（exportAllMdCore / exportAllMdImpl / downloadSelectedImagesImpl）显示全屏半透明遮罩
 // + 载入动画（浅色=半透明黑+亮色动画，深色=半透明白+暗色动画），有效阻止导出期间用户操作页面；
 // 文案由调用方按当前操作显式传入——同一节点被复用，不传则保留上次文案；
 // 导出完成（含异常/取消分支）后由包装函数在 finally 中移除
@@ -2977,8 +2979,9 @@ function exportAllRangeCount() {
   }
   return msgs.length;
 }
-// 包装：数量 > 10 时显示遮罩，try/finally 保证任何分支结束后都移除。
-// 遮罩文案必须由调用方按当前操作显式传入：同一个 DOM 节点被多次导出复用，
+// 包装：仅图片分支在此显示遮罩（数量 > 10）；md 分支的遮罩由 exportAllMdCore 显示，
+// 因为只有那里知道按日期/大小切分后的实际 md 文件数。try/finally 保证任何分支结束后都移除。
+// 遮罩文案必须按当前操作显式传入：同一个 DOM 节点被多次导出复用，
 // 不传文案时会残留上一次导出的文案（如仅图片导出显示"正在批量导出 N 个 md 文件…"）
 async function exportAllMdImpl() {
   // 仅图片模式
@@ -2994,8 +2997,7 @@ async function exportAllMdImpl() {
     }
     return;
   }
-  const count = exportAllRangeCount();
-  if (count > 10) showExportOverlay(t('ui.exportOverlayBatch', {count}));
+  // md 分支的遮罩由 exportAllMdCore 在算出实际 md 文件数后显示（见该函数内注释）
   try {
     await exportAllMdCore();
   } finally {
